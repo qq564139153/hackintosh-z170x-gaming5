@@ -1,4 +1,9 @@
 
+
+# Local reference clones / temp helpers
+_ref/
+__pycache__/
+
 # OS junk
 .DS_Store
 Thumbs.db

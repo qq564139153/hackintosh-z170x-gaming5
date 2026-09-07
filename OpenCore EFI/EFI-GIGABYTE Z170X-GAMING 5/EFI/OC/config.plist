@@ -126,8 +126,17 @@
 			</dict>
 			<key>PciRoot(0x0)/Pci(0x1f,0x3)</key>
 			<dict>
+				<key>No-hda-gfx</key>
+				<data>AAAAAAAAAAA=</data>
 				<key>layout-id</key>
 				<integer>11</integer>
+			</dict>
+			<key>PciRoot(0x0)/Pci(0x2,0x0)</key>
+			<dict>
+				<key>AAPL,ig-platform-id</key>
+				<data>AwASWQ==</data>
+				<key>device-id</key>
+				<data>ElkAAA==</data>
 			</dict>
 		</dict>
 		<key>Delete</key>
@@ -503,7 +512,7 @@
 			<key>ScanPolicy</key>
 			<integer>0</integer>
 			<key>SecureBootModel</key>
-			<string>Default</string>
+			<string>Disabled</string>
 			<key>Vault</key>
 			<string>Optional</string>
 		</dict>
@@ -543,7 +552,7 @@
 				Rg==
 				</data>
 				<key>boot-args</key>
-				<string>-v debug=0x100 keepsyms=1</string>
+				<string>keepsyms=1 npci=0x3000 alcid=11</string>
 				<key>csr-active-config</key>
 				<data>
 				AwoAAA==
