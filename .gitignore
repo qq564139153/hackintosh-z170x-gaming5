@@ -1,9 +1,3 @@
-# Archives and installers
-*.zip
-
-# OpCore-Simplify working copies / caches (third-party tool)
-OpCore-Simplify/
-OpCore-Simplify-main/
 
 # OS junk
 .DS_Store
@@ -11,6 +5,4 @@ Thumbs.db
 Desktop.ini
 
 # Editor
-.vscode/
-.idea/
 *.swp

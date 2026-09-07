@@ -119,8 +119,6 @@
 		<dict>
 			<key>PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)</key>
 			<dict>
-				<key>IOName</key>
-				<string>pci1002,67ff</string>
 				<key>device-id</key>
 				<data>/2cAAA==</data>
 				<key>model</key>
@@ -636,7 +634,7 @@
 			<key>SystemMemoryStatus</key>
 			<string>Auto</string>
 			<key>SystemProductName</key>
-			<string>iMacPro1,1</string>
+			<string>iMac18,3</string>
 			<key>SystemSerialNumber</key>
 			<string>C02THZZ3HX87</string>
 			<key>SystemUUID</key>
