@@ -129,7 +129,7 @@
 				<key>No-hda-gfx</key>
 				<data>AAAAAAAAAAA=</data>
 				<key>layout-id</key>
-				<integer>11</integer>
+				<integer>5</integer>
 			</dict>
 			<key>PciRoot(0x0)/Pci(0x2,0x0)</key>
 			<dict>
@@ -552,7 +552,7 @@
 				Rg==
 				</data>
 				<key>boot-args</key>
-				<string>keepsyms=1 npci=0x3000 alcid=11</string>
+				<string>keepsyms=1 npci=0x3000 alcid=5</string>
 				<key>csr-active-config</key>
 				<data>
 				AwoAAA==
