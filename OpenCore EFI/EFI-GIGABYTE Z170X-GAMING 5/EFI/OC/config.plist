@@ -128,6 +128,10 @@
 			<dict>
 				<key>No-hda-gfx</key>
 				<data>AAAAAAAAAAA=</data>
+				<key>alc-delay</key>
+				<integer>1000</integer>
+				<key>alctcsel</key>
+				<data>AQAAAA==</data>
 				<key>layout-id</key>
 				<integer>5</integer>
 			</dict>
@@ -552,7 +556,7 @@
 				Rg==
 				</data>
 				<key>boot-args</key>
-				<string>keepsyms=1 npci=0x3000 alcid=5</string>
+				<string>keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000</string>
 				<key>csr-active-config</key>
 				<data>
 				AwoAAA==
@@ -727,9 +731,9 @@
 			<key>PlayChime</key>
 			<string>Auto</string>
 			<key>ResetTrafficClass</key>
-			<false/>
+			<true/>
 			<key>SetupDelay</key>
-			<integer>0</integer>
+			<integer>1000</integer>
 		</dict>
 		<key>ConnectDrivers</key>
 		<true/>
