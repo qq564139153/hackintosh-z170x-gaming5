@@ -1,0 +1,134 @@
+AMDVBFLASH
+==============
+[5.0.874] April 15,2025
+	- Incremental fixes and updates
+
+[5.0.873] April 4,2025
+	- Added support for additional device ids and program
+	- Incremental fixes and updates
+
+[5.0.871] March 11,2024
+	- Incremental fixes and updates
+	
+[5.0.823] Dec 9,2024
+	- Added support for new device IDs
+
+[5.0.822] Dec 2,2024
+	- Incremental fixes and updates
+
+[5.0.819] Nov 12,2024
+	- Added support for additional device ids and program
+	- Incremental fixes and updates
+	
+[5.0.813] Oct 18,2024
+	- Added support for additional device ids and program
+	- Incremental fixes and updates
+
+[5.0.802] Aug 21,2024
+	- Incremental fixes and updates
+
+[5.0.801] Aug 02,2024
+	- Added appropriate return error code
+	- Incremental fixes and updates
+
+[5.0.777] July 02,2024
+	- Incremental fixes and updates
+
+[5.0.751] May 03,2024
+	- Added support for new SPIROM model
+	- Incremental fixes and updates
+
+[5.0.743] Apr 24,2024
+	- Added fixes to the updates done on Windows to keep dGPU awake efficiently for flashing on multi dGPU platforms.
+	- VCESWT-12191: Added support to compare SHA256 hash value of device active partition with IFWI image.
+	- Added support for new SPIROM model
+	- Incremental fixes and updates
+
+[5.0.724] Mar 28,2024
+	- Updated fix on Windows to keep dGPU awake efficiently for flashing on multi dGPU platforms.
+	- Incremental fixes and updates
+	
+[5.0.714] Mar 18,2024
+	- Incremental fixes and updates
+	
+[5.0.713] Mar 06,2024
+	- Incremental fixes and updates
+	
+[5.0.709] Feb 26,2024
+	- Updated fix to show IFWI version on multiple adapter appropriately
+	- Incremental fixes and updates
+	
+[5.0.707] Feb 19,2024
+	- NV3x: VCESWT-11897: Added support to show IFWI version information only in tool output
+	- Incremental fixes and updates
+
+[5.0.691] Feb 03,2024
+	- NV32: - VCESWT-11575: Added support for flashing via gim ioctl driver on linux
+	
+[5.0.690] Jan 16, 2024
+	- NV3x: Updated logic to show SHA256 HASH for value for each partition to compare with IFWI image flashed
+	- Incremental fixes and updates
+	
+[5.0.674] Nov 30, 2023
+	- Incremental fixes and updates
+	- Fixed partnumber display on NV2x systems
+	
+[5.0.667] Oct 30, 2023
+	- Incremental fixes and updates
+
+[5.0.665] Sept 04, 2023
+	- NV3x: Fix for multi dGPU flash with GFX driver enabled
+
+[5.0.663] Aug 11, 2023
+    - Incremental updates
+
+[5.0.658] Aug 01, 2023
+	- Incremental fixes and updates
+
+[5.0.638] May 24, 2023
+	- Incremental fixes and updates
+	
+[5.0.626] May 05, 2023
+	- NV3x: Updated fix to flash with windows driver enabled
+	- Incremental fixes and updates
+	
+[5.0.616] Mar 20, 2023
+	- NV3x: Added option to individually show --active/--inactive partition
+	- Added support for additional device ids
+
+[5.0.588] Jan 31, 2023
+	- Updated fix for intermittent detection error on linux
+	- Added support for sequential flashing via -pa command
+	- Fixed kernel warning messages on linux
+	- Incremental fixes and updates
+	
+[5.0.574] Jan 11, 2023
+	- Updated fix for saving the file with appropriate name if no filename specified
+	- Incremental fixes and updates
+
+[5.0.572] Dec 14, 2022
+	- Updated tool with support added on Windows for flashing with AMD GPU driver installed
+	- Updated fix for --accept-EULA issue
+	- Incremental fixes and updates
+	
+[5.0.547] Nov 23, 2022
+	- Added fix for incorrect SSID mismatch issue
+	
+[5.0.539] Nov 21, 2022
+	- Added support for additional device ids
+	
+[5.0.531] Oct 25, 2022
+	- Added support for additional device ids
+	
+[5.0.527] Oct 4, 2022
+	- Added support for additional device ids
+	
+[5.0.427] Aug 26, 2022
+	- Added support for additional device ids
+	
+[5.0.327] July 18, 2022
+	- Added support for additional device ids
+	
+[5.0.305] Jun 30, 2022
+	- Added initial support for newer framework tool
+	- Added relevant device/revision id support

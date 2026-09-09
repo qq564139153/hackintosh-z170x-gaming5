@@ -1,0 +1,17 @@
+AMDVBFLASH
+==============
+[5.0.531] Oct 25, 2022
+	- Added support for additional device ids
+	
+[5.0.527] Oct 4, 2022
+	- Added support for additional device ids
+	
+[5.0.427] Aug 26, 2022
+	- Added support for additional device ids
+	
+[5.0.327] July 18, 2022
+	- Added support for additional device ids
+	
+[5.0.305] Jun 30, 2022
+	- Added initial support for newer framework tool
+	- Added relevant device/revision id support
