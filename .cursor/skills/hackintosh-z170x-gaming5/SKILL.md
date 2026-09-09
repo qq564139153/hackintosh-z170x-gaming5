@@ -39,8 +39,6 @@ description: >-
 - SMBIOS：`iMac18,3`
 - GPU：`0x6FDF` → DeviceProperties `device-id` `0x67FF`（RX 570）@ `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`
 - Audio：`alcid=5` + `layout-id=5` + `alctcsel=1` + `alcdelay=1000` @ `PciRoot(0x0)/Pci(0x1f,0x3)`
-- boot-args 含 `-radcodec`（伪装 ID 视频加速）
-- Picker：`Resolution=2560x1440` + `ForceResolution` + `UIScale=1`（及 NVRAM `UIScale=01`）
 - `Misc → Boot → Timeout`：`10`
 - SSDT：EC / PLUG / SBUS / USBX
 

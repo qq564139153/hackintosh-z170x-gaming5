@@ -42,21 +42,10 @@
 ## boot-args 期望值
 
 ```
-keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000 -radcodec
+keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000
 ```
 
-`-radcodec`：2048SP 软伪装下启用 VA 编解码路径。Polaris **不要**加 `agdpmod=pikera`（那是 Navi）。
-
-## UEFI.Output / Picker 分辨率（本机 2560×1440 HDMI）
-
-| Key | 期望 |
-|-----|------|
-| `Resolution` | `2560x1440`（比 `Max` 更稳；GOP 报错再改回 `Max`） |
-| `ForceResolution` | `true` |
-| `UIScale` | `1`（不要 `0` Auto；HiDPI 才用 `2`） |
-| NVRAM `UIScale` | data `01`（`AQ==`），并加入 Delete 以便每次覆盖 |
-
-仍异常时优先试 DisplayPort；再 Reset NVRAM。
+可选：加 `-radcodec`（伪装 ID 下 VA 编码）。Polaris **不要**加 `agdpmod=pikera`（那是 Navi）。
 
 ## PlatformInfo
 
