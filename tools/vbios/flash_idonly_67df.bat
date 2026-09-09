@@ -1,11 +1,11 @@
 @echo off
 setlocal EnableExtensions
-title RX580 VBIOS Flash classic 3.31
+title RX580 VBIOS flash ID-only 67DF
 color 0A
 
 set "ROOT=%~dp0"
 set "TOOLDIR=%ROOT%AMDVBFlash-classic-3.31"
-set "ROM=%ROOT%roms\RX580_rx570_patched_fixed.rom"
+set "ROM=%ROOT%roms\RX580_idonly_67df_fixed.rom"
 set "DUMP_BEFORE=%ROOT%roms\RX580-from-card.rom"
 set "DUMP_AFTER=%ROOT%roms\RX580-after-flash.rom"
 set "LOG=%ROOT%flash-log.txt"
@@ -27,13 +27,14 @@ echo TOOLDIR=%TOOLDIR%>> "%LOG%"
 echo ROM=%ROM%>> "%LOG%"
 
 echo ============================================================
-echo  Classic AMDVBFlash 3.31 EXTERNAL - RX 580 2048SP
+echo  Classic AMDVBFlash 3.31 EXTERNAL - ID-only 67DF
 echo  Flash: %ROM%
 echo  Log  : %LOG%
 echo ============================================================
 echo.
 echo First line of -i MUST say: AMDVBFLASH version 3.31 EXTERNAL
 echo If you see 5.0.xxx, STOP.
+echo This ROM only changes Device ID 6FDF to 67DF. ASIC is unchanged.
 echo.
 pause
 
@@ -64,8 +65,8 @@ echo Saved: %DUMP_BEFORE%
 pause
 
 echo.
-echo [4/5] Unlock + force flash patched RX570 ROM
-echo Type YES to continue ^(power must stay on^).
+echo [4/5] Unlock + flash ID-only 67DF ROM
+echo Type YES to continue (power must stay on).
 set /p CONFIRM=Type YES then Enter: 
 if /I not "%CONFIRM%"=="YES" (
   echo Aborted. Nothing flashed.>> "%LOG%"
@@ -83,8 +84,8 @@ amdvbflash.exe -unlockrom 0
 echo.>> "%LOG%"
 echo === FLASH ===>> "%LOG%"
 echo Programming... DO NOT power off.
-amdvbflash.exe -p 0 -f "%ROM%" >> "%LOG%" 2>&1
-amdvbflash.exe -p 0 -f "%ROM%"
+amdvbflash.exe -p 0 "%ROM%" >> "%LOG%" 2>&1
+amdvbflash.exe -p 0 "%ROM%"
 set "FLASHERR=%ERRORLEVEL%"
 echo flash exit=%FLASHERR%>> "%LOG%"
 
@@ -99,7 +100,7 @@ echo.
 echo ==== flash end %DATE% %TIME% ====>> "%LOG%"
 echo.
 echo Next: shut down PC, cut PSU power 10 seconds, then boot.
-echo Check GPU-Z Device ID = 67FF ^(not 6FDF^).
+echo Check GPU-Z Device ID = 67DF (not 6FDF).
 echo Log saved to: %LOG%
 echo.
 pause

@@ -2,19 +2,20 @@
 """
 Patch RX 580 2048SP (device-id 0x6FDF) VBIOS for native macOS drivers.
 
-Usage (Windows):
-  1. In GPU-Z: Graphics Card -> BIOS Version -> click arrow -> "Save to file"
-     Save as e.g. original_6fdf.rom  (KEEP THIS BACKUP)
-  2. python patch_rx580_2048sp_vbios.py original_6fdf.rom
-  3. Open the *_patched.rom in PolarisBiosEditor and save once (fixes checksum)
-  4. Flash with amdvbflash (admin CMD), e.g.:
-       amdvbflash -i
-       amdvbflash -unlockrom 0
-       amdvbflash -p 0 your_patched_fixed.rom
-  5. Reboot. After success, you can remove GPU DeviceProperties spoof from OpenCore.
+Preferred (this card, PowerColor 113-D000340_2048):
+  python patch_rx580_2048sp_vbios.py original.rom --target 580 --id-only
+  python tools/fix_vbios_checksum.py tools/vbios/roms/RX580-original_rx580_idonly.rom
 
-WARNING: Wrong flash can brick the GPU (usually recoverable with dual-BIOS or
-motherboard PCI-E recovery). Always keep the original .rom.
+That only changes PCI Device ID 6FDF→67DF in ATOM + GOP PCIR (the 机器码).
+Do NOT change ASIC at 0xD4 unless a later flash still fails macOS ID checks.
+
+Usage (Windows):
+  1. GPU-Z: save original .rom (KEEP THIS BACKUP)
+  2. Run this script, then fix_vbios_checksum.py
+  3. Flash with AMDVBFLASH 3.31 EXTERNAL only
+  4. Shut down and cut PSU ~10s. After success, remove OpenCore GPU spoof.
+
+WARNING: Wrong flash can brick display (usually recoverable with iGPU / RDP).
 """
 
 from __future__ import annotations
@@ -50,7 +51,7 @@ def replace_all(data: bytearray, old: bytes, new: bytes) -> int:
     return count
 
 
-def patch_rom(src: Path, target: str) -> Path:
+def patch_rom(src: Path, target: str, id_only: bool) -> Path:
     raw = bytearray(src.read_bytes())
     if DEVICE_ID_2048SP not in raw and DEVICE_ID_RX570 not in raw and DEVICE_ID_RX580 not in raw:
         raise SystemExit(
@@ -64,29 +65,32 @@ def patch_rom(src: Path, target: str) -> Path:
         device_new, asic_new, label = DEVICE_ID_RX580, ASIC_RX580, "rx580"
 
     device_hits = replace_all(raw, DEVICE_ID_2048SP, device_new)
-    asic_hits = replace_all(raw, ASIC_2048SP, asic_new)
+    asic_hits = 0 if id_only else replace_all(raw, ASIC_2048SP, asic_new)
 
-    # Already partially patched ROM support
     if device_hits == 0 and device_new in raw:
         print("Note: device-id already matches target (or was previously patched).")
-    if asic_hits == 0 and asic_new in raw:
+    if not id_only and asic_hits == 0 and asic_new in raw:
         print("Note: ASIC id already matches target (or was previously patched).")
 
     if device_hits == 0 and asic_hits == 0 and DEVICE_ID_2048SP not in raw:
         raise SystemExit("Nothing to patch. Is this already a non-2048SP ROM?")
 
-    out = src.with_name(f"{src.stem}_{label}_patched{src.suffix or '.rom'}")
+    suffix = "idonly" if id_only else "patched"
+    out = src.with_name(f"{src.stem}_{label}_{suffix}{src.suffix or '.rom'}")
     out.write_bytes(raw)
 
     print(f"Input : {src}")
     print(f"Output: {out}")
     print(f"Replaced device-id 6FDF -> {label.upper()}: {device_hits} hit(s)")
-    print(f"Replaced ASIC 2048SP -> {label.upper()}: {asic_hits} hit(s)")
+    if id_only:
+        print("ASIC at 0xD4 left unchanged (id-only / 机器码 mode)")
+    else:
+        print(f"Replaced ASIC 2048SP -> {label.upper()}: {asic_hits} hit(s)")
     print()
     print("Next:")
-    print("  1) Open output in PolarisBiosEditor -> Save (fix checksum)")
-    print("  2) Flash with amdvbflash (keep original ROM backup)")
-    print("  3) Prefer target RX 570 for most Chinese 2048SP cards")
+    print("  1) python tools/fix_vbios_checksum.py <output>")
+    print("  2) Flash with AMDVBFLASH 3.31 EXTERNAL (keep original ROM backup)")
+    print("  3) Prefer --target 580 --id-only first; 570 ASIC drops GOP signature")
     return out
 
 
@@ -96,8 +100,13 @@ def main() -> None:
     parser.add_argument(
         "--target",
         choices=("570", "580"),
-        default="570",
-        help="Spoof as RX 570 (default, recommended) or RX 580",
+        default="580",
+        help="PCI Device ID: 580=67DF (default, keeps WHQL/GOP better) or 570=67FF",
+    )
+    parser.add_argument(
+        "--id-only",
+        action="store_true",
+        help="Only change Device ID (机器码). Do not touch ASIC at 0xD4.",
     )
     parser.add_argument(
         "--backup",
@@ -115,7 +124,7 @@ def main() -> None:
             shutil.copy2(args.rom, bak)
             print(f"Backup: {bak}")
 
-    patch_rom(args.rom, args.target)
+    patch_rom(args.rom, args.target, args.id_only)
 
 
 if __name__ == "__main__":

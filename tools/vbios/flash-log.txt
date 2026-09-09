@@ -1,0 +1,49 @@
+==== flash start 2026/09/09 周三 23:03:42.99 ==== 
+TOOLDIR=C:\Users\sean\project-code\hackintosh\tools\vbios\AMDVBFlash-classic-3.31
+ROM=C:\Users\sean\project-code\hackintosh\tools\vbios\roms\RX580_idonly_67ff_fixed.rom
+
+=== DRIVER ===
+driver installer finished
+
+=== LIST ===
+AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
+
+
+adapter bn dn fn dID       asic           flash      romsize test    bios p/n    
+======= == == == ==== =============== ============== ======= ==== ==============
+   0    01 00 00 6FDF Polaris20       GD25Q21B         40000 pass 113-D000340_2048
+
+=== DUMP BEFORE ===
+AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
+
+0x40000 bytes saved, checksum = 0xB600
+
+=== UNLOCK ===
+AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
+
+ROM Unlocked
+
+=== FLASH ===
+AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
+
+Old SSID: 2392
+New SSID: 2392
+Old P/N: 113-D000340_2048
+New P/N: 113-D000340_2048
+Old DeviceID: 6FDF
+New DeviceID: 67FF
+Old Product Name: D00034 Polaris20 XL A1 GDDR5 256Mx32 J0A09OAZ.HLC 2018 
+New Product Name: D00034 Polaris20 XL A1 GDDR5 256Mx32 J0A09OAZ.HLC 2018 
+Old BIOS Version: 015.050.002.001.000000
+New BIOS Version: 015.050.002.001.000000
+Flash type: GD25Q21B
+40000/40000h bytes programmed
+40000/40000h bytes verified
+
+Restart System To Complete VBIOS Update.
+
+=== DUMP AFTER ===
+AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
+
+0x40000 bytes saved, checksum = 0xB600
+==== flash end 2026/09/09 周三 23:04:10.94 ====
