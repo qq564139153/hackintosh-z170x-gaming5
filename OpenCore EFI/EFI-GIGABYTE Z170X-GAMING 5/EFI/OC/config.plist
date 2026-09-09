@@ -117,13 +117,6 @@
 	<dict>
 		<key>Add</key>
 		<dict>
-			<key>PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)</key>
-			<dict>
-				<key>device-id</key>
-				<data>/2cAAA==</data>
-				<key>model</key>
-				<string>AMD Radeon RX 570</string>
-			</dict>
 			<key>PciRoot(0x0)/Pci(0x1f,0x3)</key>
 			<dict>
 				<key>No-hda-gfx</key>
