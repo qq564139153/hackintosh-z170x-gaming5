@@ -5,7 +5,7 @@ color 0A
 
 set "ROOT=%~dp0"
 set "TOOLDIR=%ROOT%AMDVBFlash-classic-3.31"
-set "OUT=%ROOT%roms\RX580-from-card.rom"
+set "OUT=%ROOT%roms\dump-from-card.rom"
 
 if not exist "%TOOLDIR%\amdvbflash.exe" (
   echo ERROR: missing amdvbflash.exe

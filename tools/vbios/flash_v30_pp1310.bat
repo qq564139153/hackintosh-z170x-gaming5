@@ -1,15 +1,15 @@
 @echo off
 setlocal EnableExtensions
-title FLASH 212488 with SSID patched to 2392 - HIGH RISK
+title FLASH v30 pp1310 (212488 ssid2392 + stock clocks/TDP)
 color 0C
 
 set "ROOT=%~dp0"
 set "TOOLDIR=%ROOT%AMDVBFlash-classic-3.31"
-set "ROM=%ROOT%roms\RX570-212488_ssid2392_fixed.rom"
-set "ORIG=%ROOT%roms\RX580-original.rom"
-set "DUMP_BEFORE=%ROOT%roms\dump-before.rom"
-set "DUMP_AFTER=%ROOT%roms\dump-after.rom"
-set "LOG=%ROOT%flash-212488-ssid2392-log.txt"
+set "ROM=%ROOT%roms\v30_tpu212488_ssid2392_pp1310.rom"
+set "STOCK=%ROOT%roms\v00_stock_6FDF_ssid2392.rom"
+set "DUMP_BEFORE=%ROOT%roms\dump-before-v30.rom"
+set "DUMP_AFTER=%ROOT%roms\dump-after-v30.rom"
+set "LOG=%ROOT%flash-v30-pp1310-log.txt"
 
 if not exist "%TOOLDIR%\amdvbflash.exe" (
   echo ERROR: missing amdvbflash.exe
@@ -18,23 +18,25 @@ if not exist "%TOOLDIR%\amdvbflash.exe" (
 )
 if not exist "%ROM%" (
   echo ERROR: missing %ROM%
+  echo Run: python build_v30_pp1310.py
   pause
   exit /b 1
 )
-if not exist "%ORIG%" (
-  echo ERROR: missing original backup
+if not exist "%STOCK%" (
+  echo ERROR: missing stock backup
   pause
   exit /b 1
 )
 
 cd /d "%TOOLDIR%"
-echo ==== flash 212488 ssid2392 start %DATE% %TIME% ==== > "%LOG%"
+echo ==== flash v30 pp1310 start %DATE% %TIME% ==== > "%LOG%"
 echo ROM=%ROM%>> "%LOG%"
 
 echo ============================================================
-echo  FULL flash: Dataland 212488 with SSID forced to 2392
-echo  Device ID in ROM is 67DF. Board tables are still foreign.
-echo  Risk: HDMI black screen. Rescue: restore_original.bat
+echo  FLASH v30: TPU #212488 + SSID 2392 + stock SCLK/TDP
+echo  Target: GPU default clock 1310 MHz, TDP 145 W
+echo  Base still 67DF / foreign board tables - risk of black screen
+echo  Rescue: restore_v00_stock.bat
 echo  ROM : %ROM%
 echo ============================================================
 echo.
@@ -68,7 +70,7 @@ echo === UNLOCK ===>> "%LOG%"
 amdvbflash.exe -unlockrom 0 >> "%LOG%" 2>&1
 amdvbflash.exe -unlockrom 0
 
-echo === FLASH no -f, SSID already 2392 ===>> "%LOG%"
+echo === FLASH no -f ===>> "%LOG%"
 echo Programming. DO NOT power off.
 amdvbflash.exe -p 0 "%ROM%" >> "%LOG%" 2>&1
 amdvbflash.exe -p 0 "%ROM%"
@@ -81,7 +83,8 @@ echo ==== end %DATE% %TIME% ====>> "%LOG%"
 
 echo.
 echo If programmed+verified: shutdown, cut PSU 10s, boot.
-echo If black screen: iGPU/RDP then restore_original.bat
+echo GPU-Z should show Default Clock 1310 MHz, Device 67DF.
+echo If black screen: iGPU/RDP then restore_v00_stock.bat
 echo Log: %LOG%
 pause
 exit /b 0

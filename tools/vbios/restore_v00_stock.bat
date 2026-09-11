@@ -1,13 +1,13 @@
 @echo off
 setlocal EnableExtensions
-title RX580 restore ORIGINAL VBIOS
+title RX580 restore v00 STOCK VBIOS
 color 0C
 
 set ROOT=%~dp0
 set TOOLDIR=%ROOT%AMDVBFlash-classic-3.31
-set LOG=%ROOT%restore-log.txt
-set DUMP_AFTER=%ROOT%roms\RX580-after-restore.rom
-set ROM=%ROOT%roms\RX580-original.rom
+set LOG=%ROOT%restore-v00-log.txt
+set DUMP_AFTER=%ROOT%roms\dump-after-v00-restore.rom
+set ROM=%ROOT%roms\v00_stock_6FDF_ssid2392.rom
 
 if not exist "%TOOLDIR%\amdvbflash.exe" (
   echo ERROR: missing amdvbflash.exe
@@ -15,19 +15,19 @@ if not exist "%TOOLDIR%\amdvbflash.exe" (
   exit /b 1
 )
 if not exist "%ROM%" (
-  echo ERROR: missing original ROM
+  echo ERROR: missing stock ROM
   echo %ROM%
   pause
   exit /b 1
 )
 
 cd /d "%TOOLDIR%"
-echo ==== restore start %DATE% %TIME% ==== > "%LOG%"
+echo ==== restore v00 start %DATE% %TIME% ==== > "%LOG%"
 echo TOOLDIR=%TOOLDIR%>> "%LOG%"
 echo ROM=%ROM%>> "%LOG%"
 
 echo ============================================================
-echo  RESTORE original RX 580 2048SP VBIOS
+echo  RESTORE v00 stock RX 580 2048SP VBIOS
 echo  ROM : %ROM%
 echo  Log : %LOG%
 echo ============================================================
@@ -48,7 +48,7 @@ amdvbflash.exe -i
 echo Adapter is usually 0. Confirm Polaris20 row.
 pause
 
-echo [3/4] Unlock + flash ORIGINAL ROM
+echo [3/4] Unlock + flash STOCK ROM
 set /p CONFIRM=Type YES then Enter: 
 if /I not "%CONFIRM%"=="YES" (
   echo Aborted. Nothing flashed.>> "%LOG%"
@@ -62,8 +62,8 @@ echo Unlocking ROM...
 amdvbflash.exe -unlockrom 0 >> "%LOG%" 2>&1
 amdvbflash.exe -unlockrom 0
 
-echo === FLASH ORIGINAL ===>> "%LOG%"
-echo Programming original VBIOS. DO NOT power off.
+echo === FLASH STOCK ===>> "%LOG%"
+echo Programming stock VBIOS. DO NOT power off.
 amdvbflash.exe -p 0 "%ROM%" >> "%LOG%" 2>&1
 amdvbflash.exe -p 0 "%ROM%"
 echo flash exit=%ERRORLEVEL%>> "%LOG%"
