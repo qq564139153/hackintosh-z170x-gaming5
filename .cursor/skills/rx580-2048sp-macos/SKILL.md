@@ -46,9 +46,12 @@ description: >-
 
 **做法（2026-09-11/12 本机验证：写入成功 + HDMI 亮机正常）：**
 
-1. 保留原版：`tools/vbios/roms/RX580-original.rom`（务必备份）
+1. 保留三份 ROM（`tools/vbios/roms/`）：
+   - `RX580-original.rom` — 本机原版，MD5 `8e88fa633cc6843d7e168c45b7878bae`
+   - `RX570-212488.rom` — TPU #212488 原件，MD5 `58569ccbdd5e896666225aa7026931ac`
+   - `RX570-212488_ssid2392_fixed.rom` — 已成功刷入，MD5 `f97ab3dd3ffddee6151a66c3c11ccc3b`
 2. 将 #212488 中唯一一处 `148C:2379`（约 offset `586`）改为 `148C:2392`
-3. `python tools/fix_vbios_checksum.py …` → 得到 `roms/RX570-212488_ssid2392_fixed.rom`（MD5 `f97ab3dd3ffddee6151a66c3c11ccc3b`）
+3. `python tools/fix_vbios_checksum.py …` → 得到 `roms/RX570-212488_ssid2392_fixed.rom`
 4. 管理员运行 `tools/vbios/flash_rx570_212488_ssid2392.bat`，输入 `YES`
 5. `-i` 必须显示 `3.31 EXTERNAL`；成功日志含：
    - `Old/New SSID: 2392`
@@ -61,7 +64,7 @@ description: >-
 
 控制台若出现 `Flash already programmed`：多为 bat 对 `amdvbflash` 的第二次调用（芯片已与目标一致），以日志 programmed/verified 与 dump 哈希为准。
 
-工具目录：只用 `AMDVBFlash-classic-3.31/`（真 3.31 EXTERNAL）。名为 3.31 实为 5.0.x 的包勿用。
+工具目录：只用 `AMDVBFlash-classic-3.31/`（真 3.31 EXTERNAL）+ `amdvbflash_win_3.31_classic.zip`。名为 3.31 实为 5.0.x 的包勿用；已从本仓库移除。
 
 ### 失败 / 高风险对照（勿重蹈）
 

@@ -6,36 +6,34 @@
 
 详细诊断树见 `.cursor/skills/rx580-2048sp-macos/SKILL.md`。
 
+## 保留的 ROM（MD5）
+
+| 文件 | MD5 | 说明 |
+|------|-----|------|
+| `roms/RX580-original.rom` | `8e88fa633cc6843d7e168c45b7878bae` | 本机原版（`6FDF` / SSID `2392`） |
+| `roms/RX570-212488.rom` | `58569ccbdd5e896666225aa7026931ac` | TPU #212488 原件（`67DF` / SSID `2379`，直刷会 `0FL01`） |
+| `roms/RX570-212488_ssid2392_fixed.rom` | `f97ab3dd3ffddee6151a66c3c11ccc3b` | **已成功刷入**（SSID 已改 `2392`） |
+
 ## 目录
 
 | 路径 | 用途 |
 |------|------|
-| `AMDVBFlash-classic-3.31/` | **唯一可用** flash 工具（3.31 EXTERNAL） |
-| `roms/RX580-original.rom` | 原版备份（务必保留） |
-| `roms/RX570-212488.rom` | TPU #212488 原件（SSID `2379`，直刷会 `0FL01`） |
-| `roms/RX570-212488_ssid2392_fixed.rom` | **已成功刷入的那份**（SSID 已改 `2392`） |
-| `roms/RX580-after-212488ssid.rom` | 刷后 dump（应与上一份 0 字节差） |
+| `AMDVBFlash-classic-3.31/` | **唯一可用** flash 工具（真 3.31 EXTERNAL） |
+| `amdvbflash_win_3.31_classic.zip` | 上述工具备份包 |
 | `flash_rx570_212488_ssid2392.bat` | 刷入 SSID 补丁版 #212488 |
-| `restore_original.bat` | 还原原版 |
+| `restore_original.bat` | 还原本机原版 |
+| `dump_current.bat` | 从卡上 dump 当前 VBIOS |
 | `../fix_vbios_checksum.py` | 修 Option ROM 校验和 |
+| `../compare_vbios.py` | ROM 字节对比 |
 
-## 工具版本
-
-| 路径 | 实际版本 | 可用 |
-|------|----------|------|
-| `AMDVBFlash-classic-3.31/` | **3.31 EXTERNAL** | 是 |
-| `AMDVBFlash-3.31/` / `AMDVBFlash/` | 实为 5.0.x | 否 |
-
-EXTERNAL **无 `-f`**。跨 SSID 须先改 ROM，不能靠强制参数。
+EXTERNAL **无 `-f`**。跨 SSID 须先改 ROM，不能靠强制参数。勿用名为 3.31 实为 5.0.x 的包。
 
 ## 成功路径（SSID 补丁整刷）
 
-1. `#212488` 中 `148C:2379` → `148C:2392`，再修 checksum
+1. 以 `#212488` 为源：`148C:2379` → `148C:2392`，再 `fix_vbios_checksum.py`
 2. 管理员运行 `flash_rx570_212488_ssid2392.bat`，输入 `YES`
 3. 日志须有 `programmed` + `verified`，`6FDF→67DF`
 4. **关机 → 断电约 10 秒 → 再开**
-
-勿再刷：`RX580_rx570_patched_fixed.rom`（改 ASIC→570 曾黑屏）、未改 SSID 的 `RX570-212488.rom`。
 
 ## 还原原版
 

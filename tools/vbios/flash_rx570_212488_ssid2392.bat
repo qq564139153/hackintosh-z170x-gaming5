@@ -7,8 +7,8 @@ set "ROOT=%~dp0"
 set "TOOLDIR=%ROOT%AMDVBFlash-classic-3.31"
 set "ROM=%ROOT%roms\RX570-212488_ssid2392_fixed.rom"
 set "ORIG=%ROOT%roms\RX580-original.rom"
-set "DUMP_BEFORE=%ROOT%roms\RX580-from-card-before-212488ssid.rom"
-set "DUMP_AFTER=%ROOT%roms\RX580-after-212488ssid.rom"
+set "DUMP_BEFORE=%ROOT%roms\dump-before.rom"
+set "DUMP_AFTER=%ROOT%roms\dump-after.rom"
 set "LOG=%ROOT%flash-212488-ssid2392-log.txt"
 
 if not exist "%TOOLDIR%\amdvbflash.exe" (

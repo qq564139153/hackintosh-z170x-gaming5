@@ -2,41 +2,39 @@
 setlocal EnableExtensions
 title Dump current GPU VBIOS
 color 0A
-cd /d "%~dp0AMDVBFlash-3.31"
-if not exist "amdvbflash.exe" (
-  echo ERROR: amdvbflash.exe not found
+
+set "ROOT=%~dp0"
+set "TOOLDIR=%ROOT%AMDVBFlash-classic-3.31"
+set "OUT=%ROOT%roms\RX580-from-card.rom"
+
+if not exist "%TOOLDIR%\amdvbflash.exe" (
+  echo ERROR: missing amdvbflash.exe
   pause
   exit /b 1
 )
+if not exist "%ROOT%roms" mkdir "%ROOT%roms"
 
-set "OUT=%~dp0roms\RX580-from-card.rom"
-if not exist "%~dp0roms" mkdir "%~dp0roms"
-
+cd /d "%TOOLDIR%"
 echo ============================================================
 echo  Dump VBIOS currently stored on the GPU
+echo  Tool: AMDVBFlash-classic-3.31 (3.31 EXTERNAL)
 echo  Output: %OUT%
 echo ============================================================
 echo.
-echo Run this as Administrator. If UAC appears, click Yes.
-echo If EULA appears, type Y then Enter.
-echo.
-pause
-
-echo.
-echo [1/2] Ensure AMDVBFlash driver is installed
-start /wait "" "%~dp0AMDVBFlash-3.31\AMDVBFlashDriverInstaller.exe"
-
-echo.
-echo [2/2] List adapters, then save ROM from adapter 0
-echo.
-amdvbflash.exe --accept-EULA -i
-echo.
-echo Saving with classic syntax...
-amdvbflash.exe --accept-EULA -s 0 "%OUT%"
-if not exist "%OUT%" (
-  echo Classic -s failed, trying 5.x syntax...
-  amdvbflash.exe --accept-EULA --save --device 0 --vbios-file "%OUT%"
+echo Run as Administrator. Type YES to continue.
+set /p CONFIRM=Confirm: 
+if /I not "%CONFIRM%"=="YES" (
+  echo Aborted.
+  pause
+  exit /b 2
 )
+
+echo [1/2] Ensure AMDVBFlash driver is installed
+start /wait "" "%TOOLDIR%\AMDVBFlashDriverInstaller.exe"
+
+echo [2/2] List adapters, then save ROM from adapter 0
+amdvbflash.exe -i
+amdvbflash.exe -s 0 "%OUT%"
 
 echo.
 if exist "%OUT%" (
@@ -44,6 +42,5 @@ if exist "%OUT%" (
 ) else (
   echo ERROR: dump file was not created.
 )
-echo.
-echo Leave this window open and send a screenshot, or continue in chat.
 pause
+exit /b 0
