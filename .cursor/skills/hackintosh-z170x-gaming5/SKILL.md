@@ -37,7 +37,7 @@ description: >-
 ## 本机已知正确基线
 
 - SMBIOS：`iMac18,3`
-- GPU：`0x6FDF` → DeviceProperties `device-id` `0x67FF`（RX 570）@ `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`
+- GPU：原 `0x6FDF`；**已硬刷** TPU #212488（SSID 补丁）→ Device `0x67DF`。细节见 `rx580-2048sp-macos` 技能。软伪装可选；路径仍为 `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`
 - Audio：`alcid=5` + `layout-id=5` + `alctcsel=1` + `alcdelay=1000` @ `PciRoot(0x0)/Pci(0x1f,0x3)`
 - `Misc → Boot → Timeout`：`10`
 - SSDT：EC / PLUG / SBUS / USBX

@@ -8,7 +8,7 @@
 |----|-----|
 | 主板 | GIGABYTE Z170X-GAMING 5（Z170，BIOS F22f） |
 | CPU | i7-7700K（Kaby Lake） |
-| GPU | RX 580 2048SP，`1002-6FDF`，PCI `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`，ACPI `\_SB.PCI0.PEG0.PEGP` |
+| GPU | RX 580 2048SP 已硬刷为 `1002-67DF`（#212488 + SSID`2392`）；PCI `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`，ACPI `\_SB.PCI0.PEG0.PEGP`；原版备份仍为 `6FDF` |
 | 显示器 | HDMI 2560×1440（走独显） |
 | 声卡 | Realtek ALC1150 `10EC-0900`，控制器 `8086-A170`，路径 `PciRoot(0x0)/Pci(0x1f,0x3)`（HDAS） |
 | 有线网 | I219-V `8086-15B8` + Killer E2400 `1969-E0A1` |
