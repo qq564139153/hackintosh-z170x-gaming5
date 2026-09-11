@@ -16,10 +16,11 @@ description: >-
 ## 诊断树
 
 1. 系统报告 Device ID 仍为 `6FDF`？→ 未伪装，或 DeviceProperties 路径错误
-2. 已是 `67FF`/`67DF` 但仅能出图、动画卡？→ 软伪装不完整（常见）
+2. 已是 `67FF`/`67DF` 但仅能出图、动画卡？→ 软伪装不完整（常见）；社区共识下一步是刷 VBIOS
 3. Metal 无 / 显存约 5MB？→ spoof 未生效，或路径 / WhateverGreen 问题
 4. `amdvbflash` 报 `0FL01` / `SSID mismatched`？→ EXTERNAL 无 `-f`，须改 ROM 的 SSID 与卡一致后再刷
 5. GPU-Z 默认钟 1244 而非 1310？→ 卡上仍是 v20；可刷 v30（见下）
+6. 刷后独显黑屏但远程桌面还能进？→ ROM/GOP 问题；核显救援 + `restore_v00_stock.bat`（须交互窗口）
 
 ## 软伪装（OpenCore）
 
@@ -27,7 +28,8 @@ description: >-
 - **推荐** `device-id` → `67FF`（RX 570）；不要仅为显示名改回 `67DF`
 - plist `device-id` 为 **小端 data**（`67FF` → base64 `/2cAAA==`）
 - 改完：覆盖 ESP → **Reset NVRAM**
-- VBIOS 已硬改成 `67DF` 后，可去掉 GPU DeviceProperties 伪装再测
+- **上限：** 软伪装常只能出分辨率；Dock/调度中心动画仍卡、Metal 不完整 → 必须硬刷，不是再改显示名
+- **本机现状（v30）：** 卡上已是 `67DF`，EFI **已去掉** GPU DeviceProperties；勿再加回伪装除非还原了 v00
 
 ## SMBIOS / AGPM
 
@@ -37,8 +39,9 @@ description: >-
 ## WhateverGreen
 
 - Polaris **不要** `agdpmod=pikera`
-- 可选 `-radcodec`
-- 连接优先 DisplayPort
+- 可选 `-radcodec`（伪装 ID 下补 VA；对 Dock 动画未必明显）
+- YouTube 卡顿：常叠加 VP9/AV1 **无硬解**（CPU 软解），不完全是 GPU「性能不够」
+- 连接优先 DisplayPort；HDMI 1440p 上勿用 ForceResolution 修 Picker（见 `hackintosh-z170x-gaming5`）
 
 ## VBIOS ROM 版本（`tools/vbios/roms/`）
 
