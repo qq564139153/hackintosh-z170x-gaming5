@@ -74,7 +74,15 @@ description: >-
 
 ### 性能修复（v30，待本机刷入验证）
 
-GPU-Z 对照（v00 vs v20）：默认钟 **1310 → 1244（≈-5%）**；Shaders/显存不变。
+GPU-Z 对照（v00 vs v20）：默认钟 **1310 → 1244（≈-5%）**；Shaders/显存不变。填充率是钟频推算值，不是 ROM 里另存的字段：
+
+| | v00 / 目标 | v20（当前掉的） |
+|---|---|---|
+| Default Clock | 1310 MHz | 1244 MHz |
+| Pixel Fillrate | **41.9** GPixel/s | 39.8 |
+| Texture Fillrate | **167.7** GTexel/s | 159.2 |
+
+公式：`Pixel = MHz×32/1000`，`Texture = MHz×128/1000`（本机 32 ROP / 128 TMU）。v30 把 P7 拉回 1310 后，这两项会一起回到左边数值。
 
 v30 = v20 上拷贝 v00 的 PowerPlay：
 

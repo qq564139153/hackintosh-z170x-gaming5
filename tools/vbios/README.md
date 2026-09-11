@@ -53,7 +53,7 @@ EXTERNAL **无 `-f`**。跨 SSID 须先改 ROM。勿用名为 3.31 实为 5.0.x 
 3. 管理员运行对应 bat，输入 `YES`  
 4. 日志须有 `programmed` + `verified`  
 5. **关机 → 断电约 10 秒 → 再开**  
-6. GPU-Z：Device `67DF`；v30 时 Default Clock 应为 **1310 MHz**
+6. GPU-Z：Device `67DF`；v30 时 Default Clock **1310 MHz**，Pixel/Texture Fillrate 回到 **41.9 / 167.7**（由核频×ROP/TMU 推算，非单独字段）
 
 重新生成 v30：
 
