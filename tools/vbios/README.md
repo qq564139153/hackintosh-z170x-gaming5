@@ -13,7 +13,7 @@
 | `v00_stock_6FDF_ssid2392.rom` | `8e88fa633cc6843d7e168c45b7878bae` | 本机原版 dump（救援用） |
 | `v10_tpu212488_upstream.rom` | `58569ccbdd5e896666225aa7026931ac` | [TechPowerUp #212488](https://www.techpowerup.com/vgabios/212488/212488) 原件（SSID `2379`，**不可直刷**） |
 | `v20_tpu212488_ssid2392.rom` | `f97ab3dd3ffddee6151a66c3c11ccc3b` | v10 + SSID→`2392`；**已验证亮机**（默认钟 ≈1244 MHz） |
-| `v30_tpu212488_ssid2392_pp1310.rom` | `b669d2a6a74b095d73e15def6aad2597` | v20 + 原版 SCLK/TDP；目标默认钟 **1310 MHz** / TDP **145 W**（待刷验证） |
+| `v30_tpu212488_ssid2392_pp1310.rom` | `b669d2a6a74b095d73e15def6aad2597` | v20 + 原版 SCLK/TDP；默认钟 **1310 MHz** / TDP **145 W**（**2026-09-12 已刷入，dump-after 一致**） |
 
 ### 上游来源
 

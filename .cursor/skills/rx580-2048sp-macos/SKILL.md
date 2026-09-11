@@ -72,7 +72,7 @@ description: >-
 6. **关机 → 断电约 10 秒 → 再开**
 7. GPU-Z：Device `67DF`，P/N 含 `113-D0003400_100`，默认钟 ≈1244
 
-### 性能修复（v30，待本机刷入验证）
+### 性能修复（v30，2026-09-12 本机刷入成功）
 
 GPU-Z 对照（v00 vs v20）：默认钟 **1310 → 1244（≈-5%）**；Shaders/显存不变。填充率是钟频推算值，不是 ROM 里另存的字段：
 
@@ -95,7 +95,7 @@ python tools/vbios/build_v30_pp1310.py
 # 管理员: tools/vbios/flash_v30_pp1310.bat
 ```
 
-刷后 GPU-Z 目标：Default Clock **1310 MHz**，Device 仍 `67DF`。黑屏则 `restore_v00_stock.bat`。
+本机日志要点：`3.31 EXTERNAL`；刷前 dump=v20；`40000/40000h programmed` + `verified`；刷后 dump 与 v30 **MD5 一致**（`b669d2a6…`），P7=1310 / TDP=145。刷后须 **关机断电约 10 秒**。GPU-Z 成功判据：Default Clock **1310**（当前 GPU Clock 可能仍是中低 P-state，如 1244；Fillrate 跟**当前钟**走，负载拉满才会到 41.9/167.7）。黑屏则 `restore_v00_stock.bat`。
 
 工具：只用 `AMDVBFlash-classic-3.31/`（真 3.31 EXTERNAL）。
 
