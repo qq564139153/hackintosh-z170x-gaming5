@@ -64,8 +64,10 @@ description: >-
 
 ## 启动日志
 
-- 排障：boot-args 临时加 `-v`；需要更全日志时可开 `Misc → Debug → AppleDebug` / `Target`
-- 稳定后可去掉 `-v`；本机曾因分辨率改坏启动，用 `-v` 确认卡点
+- 排障基线（OS_13 / OS_26 可同开）：`Misc → Debug` 设 `AppleDebug=true`、`ApplePanic=true`、`Target=67`（屏幕+串口+文件）；boot-args 加 `-v`
+- `Target=67`：OpenCore 阶段屏上可见 DEBUG；ESP 根目录会写 `opencore-YYYY-MM-DD-hhmmss.txt`
+- 稳定后：关掉 `AppleDebug`/`ApplePanic`，`Target` 改回 `0` 或 `3`，并去掉 `-v`
+- 本机曾因分辨率改坏启动，用 `-v` 确认卡点
 
 ## 视频卡顿（软伪装时代遗留）
 

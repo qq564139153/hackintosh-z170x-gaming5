@@ -518,9 +518,9 @@
 		<key>Debug</key>
 		<dict>
 			<key>AppleDebug</key>
-			<false/>
+			<true/>
 			<key>ApplePanic</key>
-			<false/>
+			<true/>
 			<key>DisableWatchDog</key>
 			<true/>
 			<key>DisplayDelay</key>
@@ -532,7 +532,7 @@
 			<key>SysReport</key>
 			<false/>
 			<key>Target</key>
-			<integer>3</integer>
+			<integer>67</integer>
 		</dict>
 		<key>Entries</key>
 		<array/>
@@ -603,7 +603,7 @@
 				Rg==
 				</data>
 				<key>boot-args</key>
-				<string>keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000</string>
+				<string>-v keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000</string>
 				<key>csr-active-config</key>
 				<data>
 				AwoAAA==
