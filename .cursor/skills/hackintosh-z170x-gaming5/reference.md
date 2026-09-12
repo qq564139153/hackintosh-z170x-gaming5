@@ -84,13 +84,17 @@ SSDT：EC、PLUG、SBUS、USBX。
 | Key | 当前/期望 |
 |-----|-----------|
 | `AudioDevice` | 必须是 HDA 控制器：`PciRoot(0x0)/Pci(0x1f,0x3)`（不是 Root Port `1b.0`） |
-| `AudioSupport` | 仅在为 `true` 时，ResetTrafficClass / SetupDelay 等才生效 |
+| `AudioSupport` | 本机 OS_13 基线 **false**；开 true 才能让 ResetTrafficClass / DisconnectHda / SetupDelay 生效 |
+| `DisconnectHda` / `ResetTrafficClass` / `SetupDelay` | 本机热重启无声试过（含 DisconnectHda + SetupDelay=1500）**无效已还原** |
+
+无 `UEFI → Quirks → ResetHDA`；勿按过时 GPT 建议硬加该键。热重启优先 Windows 关快速启动。
 
 ## OpCore-Simplify 注意
 
 - Spoof 表可含 `"1002-6FDF": "1002-67FF"`（仅软伪装阶段）
 - Polaris 机型优先 `iMac18,3`，不要默认成 iMacPro
 - 硬刷后生成 EFI 时勿再强加 GPU `device-id` 伪装
+- **Tahoe / OS_26：** Simplify 会选 `MacPro7,1` + AMFI/Skywalk/RestrictEvents/`apfs_aligned`（保留）；必须手工补回本机 `AppleALC`/`WhateverGreen`、HDA DeviceProperties、`alcid=5…`，并把 `AudioDevice` 从错误的 `1b.0` 改成 `1f.3`。细节见 `SKILL.md`「OS_13 → OS_26」
 
 ## 审核 checklist
 

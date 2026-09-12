@@ -50,6 +50,7 @@ description: >-
 - SMBIOS：`iMac18,3`
 - GPU：已硬刷 v30（TPU #212488 + SSID`2392` + 原版 PowerPlay）→ Device **`0x67DF`**。**无** GPU DeviceProperties 软伪装（刷成功后已去掉）
 - Audio：`alcid=5` + `layout-id=5` + `alctcsel=1` + `alcdelay=1000` @ `PciRoot(0x0)/Pci(0x1f,0x3)`
+  - Windows 热重启无声：`AudioSupport`+`DisconnectHda` 本机实测无效已还原；优先 Windows 关快速启动 / `powercfg -h off`
 - Output：`Resolution=Max`，`ForceResolution=false`，`UIScale=0`
 - `Misc → Boot → Timeout`：`10`
 - SSDT：EC / PLUG / SBUS / USBX
@@ -74,10 +75,49 @@ description: >-
 
 ## 本机已知未完成 / 易误判
 
-- `UEFI → Audio → AudioSupport` 仍为 `false` 时，UEFI 音频 quirks 全部无效（`AudioDevice` 已是 `1f.3`）
+- Windows→macOS 热重启无声：`AudioSupport`+`DisconnectHda` 本机无效；见 `applealc-layout-tuning`（先 Windows 快速启动，勿再推该 EFI 组合）
 - WiFi BCM4360（`14E4-43A0`）在 Ventura 上可能需 AirportBrcmFixup（+ OCLP）
 - `UTBDefault.kext` = 无真实 USB map
 - 公开 git：勿提交超大 `.exe` / Results 缓存；注意 SMBIOS 序列号隐私
+
+## OS_13 → OS_26（OpCore Simplify）对照
+
+路径：`OS_13/EFI`（已验证）vs `OS_26/EFI-GIGABYTE Z170X-GAMING 5/EFI`（生成后需补本机改动）。
+
+### 「需要 OpenCore Legacy Patcher」含义
+
+- 本机 **Kaby Lake + BCM4360** 在 Sonoma/Sequoia/**Tahoe** 已不在 Apple 原生支持范围
+- OpCore 提示：进系统后还要用 **OCLP 做 root patch**（常见：旧无线、部分音频/驱动签名）
+- **不是**「只靠 OCLP 就能装」；仍要先有可启动 EFI + 安装介质
+- **风险（2026-09）：** 官方 OCLP 对 Tahoe 仍不稳定/未完整；RX 580 Polaris 在 Tahoe 上可能卡在图形安装界面。优先保证 Ventura 可回退
+
+### Simplify 生成的 OS26 会多出什么（应保留）
+
+| 项 | 作用 |
+|----|------|
+| `AMFIPass` + `amfi=0x80` | 放宽 AMFI，配合 root patch |
+| `RestrictEvents` + NVRAM `revpatch=sbvmm` | 更新/机型相关 |
+| `IOSkywalkFamily` + `IO80211FamilyLegacy` + Block 系统 IOSkywalk | Sonoma+ 旧 Broadcom Wi‑Fi |
+| `apfs_aligned.efi` + `APFS.EnableJumpstart=false` | Tahoe APFS 对齐 |
+| SMBIOS `MacPro7,1` | dGPU-only / 新系统常见选择（勿盲目改回 `iMac18,3` 除非验证可装） |
+
+### 必须从 OS13 迁到 OS26 的本机改动
+
+1. **补 kext：** `AppleALC`、`WhateverGreen`（Simplify 的 OS26 包常缺）
+2. **DeviceProperties：** HDA `1f.3` 的 `layout-id=5` / `alc-delay` / `alctcsel` / `No-hda-gfx`；可选 iGPU headless `2.0`
+3. **boot-args 合并：** 保留 OS26 的 `-v debug=0x100 amfi=0x80`，加上 OS13 的 `npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000`
+4. **UEFI.Audio：** `AudioDevice` 必须是 `PciRoot(0x0)/Pci(0x1f,0x3)`（Simplify 常错写成 `1b.0`）；`ResetTrafficClass`/`SetupDelay` 对齐 OS13
+5. **Output：** 保持 `Resolution=Max` / `ForceResolution=false` / `UIScale=0`（勿搬 ForceResolution 坑）
+6. **Timeout：** 可改 `10`（本机习惯）
+7. **勿加** GPU DeviceProperties（本机已硬刷 `67DF`）
+8. **勿删** OS26 的 AMFI / Skywalk / RestrictEvents / `apfs_aligned`
+
+### 安装顺序建议
+
+1. 改好的 OS26 EFI 写到独立 U 盘 ESP（保留 OS13 EFI / 系统盘不动）
+2. Reset NVRAM → 试启动安装器
+3. 装完进桌面后再考虑 OCLP root patch（Wi‑Fi / AppleHDA 等）
+4. 失败则仍用 OS13 EFI 回 Ventura
 
 ## 标准部署检查清单
 
