@@ -19,8 +19,9 @@ description: >-
 2. 已是 `67FF`/`67DF` 但仅能出图、动画卡？→ 软伪装不完整（常见）；社区共识下一步是刷 VBIOS
 3. Metal 无 / 显存约 5MB？→ spoof 未生效，或路径 / WhateverGreen 问题
 4. `amdvbflash` 报 `0FL01` / `SSID mismatched`？→ EXTERNAL 无 `-f`，须改 ROM 的 SSID 与卡一致后再刷
-5. GPU-Z 默认钟 1244 而非 1310？→ 卡上仍是 v20；可刷 v30（见下）
-6. 刷后独显黑屏但远程桌面还能进？→ ROM/GOP 问题；核显救援 + `restore_v00_stock.bat`（须交互窗口）
+5. GPU-Z 默认钟 1244？→ **正常（日常 v20）**；勿为追 1310 再刷完整 v30
+6. 曾刷 v30 后 AMD 掉驱动 / GPU-Z 钟 0 MHz？→ 回退 v20（已验证恢复）
+7. 刷后独显黑屏但远程桌面还能进？→ ROM/GOP 问题；核显救援 + `restore_v00_stock.bat`（须交互窗口）
 
 ## 软伪装（OpenCore）
 
@@ -29,7 +30,7 @@ description: >-
 - plist `device-id` 为 **小端 data**（`67FF` → base64 `/2cAAA==`）
 - 改完：覆盖 ESP → **Reset NVRAM**
 - **上限：** 软伪装常只能出分辨率；Dock/调度中心动画仍卡、Metal 不完整 → 必须硬刷，不是再改显示名
-- **本机现状（v30）：** 卡上已是 `67DF`，EFI **已去掉** GPU DeviceProperties；勿再加回伪装除非还原了 v00
+- **本机现状（v20）：** 卡上 `67DF` + SSID `2392`（#212488）；曾试 v30 后回退。EFI **已去掉** GPU DeviceProperties；勿再加回伪装除非还原了 v00
 
 ## SMBIOS / AGPM
 
@@ -50,7 +51,7 @@ description: >-
 | `v00_stock_6FDF_ssid2392.rom` | `8e88fa633cc6843d7e168c45b7878bae` | 本机原版 / 救援 |
 | `v10_tpu212488_upstream.rom` | `58569ccbdd5e896666225aa7026931ac` | TPU 原件（不可直刷） |
 | `v20_tpu212488_ssid2392.rom` | `f97ab3dd3ffddee6151a66c3c11ccc3b` | **已验证亮机**（≈1244 MHz） |
-| `v30_tpu212488_ssid2392_pp1310.rom` | `b669d2a6a74b095d73e15def6aad2597` | v20 + 原版 SCLK/TDP → **1310 MHz / TDP 145** |
+| `v30_tpu212488_ssid2392_pp1310.rom` | `b669d2a6a74b095d73e15def6aad2597` | v20 + 原版 SCLK/TDP → 1310/145；**本机间歇掉驱动，已弃用日常** |
 
 命名：`vNN_<来源>[_改动]`；数字越大叠改越多。
 
@@ -75,30 +76,21 @@ description: >-
 6. **关机 → 断电约 10 秒 → 再开**
 7. GPU-Z：Device `67DF`，P/N 含 `113-D0003400_100`，默认钟 ≈1244
 
-### 性能修复（v30，2026-09-12 本机刷入成功）
+### 性能：v30 试过 → 弃用；日常用 v20（2026-09-12）
 
-GPU-Z 对照（v00 vs v20）：默认钟 **1310 → 1244（≈-5%）**；Shaders/显存不变。填充率是钟频推算值，不是 ROM 里另存的字段：
+GPU-Z：v00 默认钟 **1310**，v20 **1244（≈-5%）**。填充率由核频推算：`Pixel=MHz×32/1000`，`Texture=MHz×128/1000`。
 
-| | v00 / 目标 | v20（当前掉的） |
-|---|---|---|
-| Default Clock | 1310 MHz | 1244 MHz |
-| Pixel Fillrate | **41.9** GPixel/s | 39.8 |
-| Texture Fillrate | **167.7** GTexel/s | 159.2 |
+v30 = v20 + 拷贝 v00 的 SCLK P0–P7 与 PowerTune（TDP 145 等）；刷写 `programmed`+`verified`，dump MD5 一致。相对 v20 仅约 20 字节差——**不是漏改，是改太猛**。
 
-公式：`Pixel = MHz×32/1000`，`Texture = MHz×128/1000`（本机 32 ROP / 128 TMU）。v30 把 P7 拉回 1310 后，这两项会一起回到左边数值。
+### v30 间歇掉驱动 → 回退 v20 已恢复
 
-v30 = v20 上拷贝 v00 的 PowerPlay：
+**现象：** 刷 v30 后首启正常；再重启数次 → AMD「无法加载显示驱动程序」；GPU-Z 钟 **0 MHz**、仅 OpenGL 1.1；Default Clock 仍 **1310**。
 
-- SCLK P0–P7（P7：1244→1310）
-- PowerTune：TDP 120→145，TDC 107→120，Battery/Small/MaxPD 120→130
-- **不改** Device ID / SSID / 颗粒 straps / ASIC（避免重蹈「原版改 ASIC→黑屏」）
+**含义：** ROM 仍在（能读到 1310），是 **驱动初始化失败**，不是没刷上。外板 #212488 电压/供电标定 + 原版整条 SCLK/TDP145 不匹配。
 
-```text
-python tools/vbios/build_v30_pp1310.py
-# 管理员: tools/vbios/flash_v30_pp1310.bat
-```
+**GPU-Z 显示 `148C:2379`：** 驱动挂时可能按 P/N 套 TPU 库；以 `dump_current.bat` MD5 为准（v20=`f97ab3dd…`，SSID 字节 `2392`）。
 
-本机日志要点：`3.31 EXTERNAL`；刷前 dump=v20；`40000/40000h programmed` + `verified`；刷后 dump 与 v30 **MD5 一致**（`b669d2a6…`），P7=1310 / TDP=145。刷后须 **关机断电约 10 秒**。GPU-Z 成功判据：Default Clock **1310**（当前 GPU Clock 可能仍是中低 P-state，如 1244；Fillrate 跟**当前钟**走，负载拉满才会到 41.9/167.7）。黑屏则 `restore_v00_stock.bat`。
+**已验证修复：** `flash_v20_ssid2392.bat` → 关机断电约 10 秒 → **驱动恢复正常**。本机日常停留 v20；勿再刷完整 v30。若再试性能：只改 P7、或 Windows 软超；不要整表拷 SCLK+TDP145。
 
 工具：只用 `AMDVBFlash-classic-3.31/`（真 3.31 EXTERNAL）。
 
@@ -111,6 +103,7 @@ python tools/vbios/build_v30_pp1310.py
 | 本机 dump 仅改 PCIR `6FDF→67FF` | 写入成功；亮屏情况以当时断电验证为准 |
 | TPU #208046 | 与原版哈希相同，刷了无收益 |
 | TPU #207832 / #238313 | SSID=`2392` 但 **无 Hynix straps** → 高黑屏风险；且仍是 `6FDF` |
+| v30（整表 SCLK + TDP145） | 刷入成功；首启正常，数次重启后 Windows 掉驱动；**回退 v20 恢复** |
 
 远景等：ASIC 改成 570 易掉 GOP；成功路径是 **整份换 #212488 + 只改 SSID（v20）**，性能用 **v30 改 PowerPlay**，不要用原版改 ASIC。
 

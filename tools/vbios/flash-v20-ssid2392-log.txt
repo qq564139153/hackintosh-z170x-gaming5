@@ -1,5 +1,5 @@
-==== flash v30 pp1310 start 2026/09/12 周六 10:26:37.76 ==== 
-ROM=C:\Users\sean\project-code\hackintosh\tools\vbios\roms\v30_tpu212488_ssid2392_pp1310.rom
+==== flash v20 ssid2392 start 2026/09/12 周六 10:29:38.10 ==== 
+ROM=C:\Users\sean\project-code\hackintosh\tools\vbios\roms\v20_tpu212488_ssid2392.rom
 === DRIVER ===
 === LIST ===
 AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
@@ -16,12 +16,26 @@ AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc
 AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
 
 ROM Unlocked
-=== FLASH no -f ===
+=== FLASH no -f, SSID already 2392 ===
 AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
 
-Flash already programmed
+Old SSID: 2392
+New SSID: 2392
+Old P/N: 113-D0003400_100
+New P/N: 113-D0003400_100
+Old DeviceID: 67DF
+New DeviceID: 67DF
+Old Product Name: D00034 Polaris20 XL A1 GDDR5 256Mx32 J0C19OAT.MLC 2017 
+New Product Name: D00034 Polaris20 XL A1 GDDR5 256Mx32 J0C19OAT.MLC 2017 
+Old BIOS Version: 015.050.002.001.000000
+New BIOS Version: 015.050.002.001.000000
+Flash type: GD25Q21B
+40000/40000h bytes programmed
+40000/40000h bytes verified
+
+Restart System To Complete VBIOS Update.
 === DUMP AFTER ===
 AMDVBFLASH version 3.31 EXTERNAL, Copyright (c) 2021 Advanced Micro Devices, Inc.
 
 0x40000 bytes saved, checksum = 0xB400
-==== end 2026/09/12 周六 10:26:59.04 ====
+==== end 2026/09/12 周六 10:30:03.91 ====
