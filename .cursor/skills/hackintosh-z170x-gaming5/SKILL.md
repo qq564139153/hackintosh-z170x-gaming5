@@ -69,7 +69,32 @@ description: >-
 - 稳定后：关掉 `AppleDebug`/`ApplePanic`，`Target` 改回 `0` 或 `3`，并去掉 `-v`
 - 本机曾因分辨率改坏启动，用 `-v` 确认卡点
 
-## 偶发重启 / `-v` 卡在 ASP（2026-09）
+## OpCore Simplify 默认 vs 本机 OS_13（2026-09 实测）
+
+用 `SysReport` + Ventura `22.99.99` 非交互生成默认包（`tools_compare_default_build.py`），再对 `OS_13`（`tools_compare_to_os13.py`）。
+
+### 确认是工具 BUG / 缺口
+
+1. **`AirportBrcmFixup` 漏选：** `14E4-43A0` 在 `BroadcomWiFiIDs` 索引 18，但选择逻辑只用 `[:15]`/`[15]`/`[16:18]` → **默认包无 Wi‑Fi 修复 kext**；本机 OS_13 已手工补上，正确
+2. **`UEFI.Audio.AudioDevice` 写成 `PciRoot(0x0)/Pci(0x1b,0x0)`（Root Port）**，本机正确为 HDA `1f.3`
+3. **SysReport 仍为 `6FDF` 时默认加 GPU `device-id→67FF` 软伪装**；本机已硬刷 `67DF`，OS_13 **无** GPU DeviceProperties——勿把默认伪装盖回去
+4. **PM991（`MZ9LQ`/`A809`）不告警**；只加 `NVMeFix`。偶发重启优先换盘，不是再对齐 Simplify 默认
+
+### 默认合理、与 OS_13 一致或可忽略
+
+- SMBIOS `iMac18,3`；SSDT：EC/PLUG/SBUS/USBX（Simplify 多 `SSDT-MCHC`，可留）
+- 共用 kext：Lilu / VirtualSMC(+SMC*) / WEG / AppleALC / NVMeFix / 双网卡 / USBToolBox+UTBDefault
+- `layout-id=5`；Output `Max` / 无 ForceResolution
+- Kernel/Booter/UEFI Quirks 与 OS_13 无关键
+
+### 本机相对默认的有意改动（勿当 BUG 回退）
+
+| 项 | Simplify 默认 | OS_13 |
+|----|---------------|-------|
+| boot-args | `-v debug=0x100 keepsyms=1 -radcodec` | `npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000`（无 `-radcodec` 亦可） |
+| HDA props | 仅 `layout-id` | + `alc-delay` / `alctcsel` / `No-hda-gfx` |
+| SecureBootModel | `Default` | `Disabled` |
+| Debug Target | `3` | `67`（排障） |
 
 本机 SysReport 存储：`8086-A102` SATA（GLOWAY STK240GS3-S7）+ Samsung NVMe `144D-A809` / 型号 **`MZ9LQ128HBHQ-00000`（PM991 OEM；Report 常误标成 980）**。  
 **macOS 在该 NVMe 上**（用户确认）。日志里 `Rome…D22…Cryptex` = Ventura（Darwin 22）。
@@ -81,12 +106,12 @@ description: >-
 - 本机已有 `NVMeFix`，对 PM991 **不足以**当根治；偶发重启/启动晚期挂起与盘侧超时很吻合
 - 日志里 `disk1` TRIM ~9s、以及 SATA Port5 空口噪声：在「系统在 NVMe」前提下，**降级为次要**；Port5 仍可忽略
 
-缓解（一次改一项，仍优先换盘）：
+缓解（一次改一项；暂不换盘时）：
 
 1. 已有：`NVMeFix` + Lilu
-2. DeviceProperties 在 `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)` 加 `ps-max-latency-us` = `0`（关激进电源/APST 类行为，社区对问题 Samsung NVMe 常用）
-3. 可试 `Kernel → Quirks → SetApfsTrimTimeout` = `0`
-4. **可靠方案**：把 Ventura 迁到兼容盘（如 WD SN750 / 多数 Phison；本机光威 SATA 仅作临时，不如换正规兼容 NVMe）
+2. **已加（2026-09）：** `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)` → `ps-max-latency-us=0`（PM991 临时降 APST；需覆盖 ESP + Reset NVRAM）
+3. 仍偶发再试：`Kernel → Quirks → SetApfsTrimTimeout` = `0`
+4. **可靠方案仍是换盘**（WD SN750 / 多数 Phison 等）
 
 ### 日志噪声（通常不是根因）
 

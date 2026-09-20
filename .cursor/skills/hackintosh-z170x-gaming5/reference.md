@@ -44,6 +44,12 @@
 
 - headless `ig-platform-id` `59120003`（`AwASWQ==`）
 
+### NVMe（PM991 临时缓解）— `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)`
+
+| Key | 值 |
+|-----|-----|
+| `ps-max-latency-us` | `0`（integer；暂不换盘时降 APST） |
+
 ## boot-args 期望值
 
 ```
@@ -96,6 +102,9 @@ SSDT：EC、PLUG、SBUS、USBX。
 - 硬刷后生成 EFI 时勿再强加 GPU `device-id` 伪装
 - **Tahoe / OS_26：** Simplify 会选 `MacPro7,1` + AMFI/Skywalk/RestrictEvents/`apfs_aligned`（保留）；必须手工补回本机 `AppleALC`/`WhateverGreen`、HDA DeviceProperties、`alcid=5…`，并把 `AudioDevice` 从错误的 `1b.0` 改成 `1f.3`。细节见 `SKILL.md`「OS_13 → OS_26」
 - **SATA `8086-A102`：** 在 `UnsupportedSATAControllerIDs` 内，但自动选 kext 会因控制器名含 `AHCI` 而跳过 `CtlnaAHCIPort`；生成包不等于「不需要」，见 `SKILL.md`「偶发重启」
+- **WiFi `14E4-43A0`（BCM4360）BUG（2026-09 实测）：** `kext_maestro` 用 `BroadcomWiFiIDs[:15]` / `[15]` / `[16:18]` 切片，**漏掉**索引 18+ 的 `43A0`/`43A3`/`43BA` → 默认 **不选** `AirportBrcmFixup`。本机 OS_13 已手工包含，勿删
+- **NVMe PM991：** Report 标成 980/`144D-A809`；黑名单只有 `A808`，Simplify 只加 `NVMeFix` 不警告 → 与偶发重启相关，见「偶发重启」
+- **对比脚本：** `OpCore-Simplify-main/tools_compare_default_build.py`（非交互生成 Ventura 默认）+ `tools_compare_to_os13.py`（对 OS_13）
 
 ## 存储（SysReport）
 
