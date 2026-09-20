@@ -65,7 +65,12 @@ description: >-
 ## 启动日志
 
 - 排障基线（OS_13 / OS_26 可同开）：`Misc → Debug` 设 `AppleDebug=true`、`ApplePanic=true`、`Target=67`（屏幕+串口+文件）；boot-args 加 `-v`
-- `Target=67`：OpenCore 阶段屏上可见 DEBUG；ESP 根目录会写 `opencore-YYYY-MM-DD-hhmmss.txt`
+- `Target=67`：OpenCore 阶段屏上可见 DEBUG；ESP 根目录会写 `opencore-YYYY-MM-DD-hhmmss.txt`（预分配 **256KB**，尾部大量 `0x00` 正常）
+- 判读（本机 2026-09 `Documents/黑苹果log` 实测）：
+  - **有用**：含 `AAPL: #[EB|` 且以 `LOG:EXITBS:START` 结尾 → `boot.efi` 已成功交接内核；可核对 `MBA:OUT`（boot-args）、`BRD:NV`（`Mac-BE088AF8C5EB4FA2`=iMac18,3）、`CSR:OUT`
+  - **几乎无用**：整文件非零字节为 0（仅占位）→ 多半选了 Windows / Reset NVRAM / 未走到 AppleDebug，可删
+  - **覆盖范围**：`AppleDebug` 文件日志主要是 **boot.efi 早启**，通常 **没有** `OC:` 行，也 **没有** 内核 `-v` 之后的内容 → 查 GPU/声卡/kext panic 不够，需屏上 `-v` 或系统日志
+  - `Err(0xE) <- RT.GV boot-signature/boot-image*` 等缺 NVRAM 项：黑苹果常见，**不是**故障
 - 稳定后：关掉 `AppleDebug`/`ApplePanic`，`Target` 改回 `0` 或 `3`，并去掉 `-v`
 - 本机曾因分辨率改坏启动，用 `-v` 确认卡点
 
@@ -121,6 +126,12 @@ description: >-
 | `AMFI: …dyld_shared_cache… is adhoc signed` | SIP/`csr` 放宽后常见 |
 | `shared_region … vm_shared_region_start_address() failed` | 多见于 launchd/dyld；常为伴随症状 |
 | `AHCI … Port 5 … COMRESET` / `PxSSTS: 0x4` | 空口；AHCI 仍会成功初始化 |
+| `failed to load virtual random: (-147) (-536870212)` | `prng_seedctl` 尝试加载 **VirtIO/虚拟熵源**（真机无此设备）→ `kIOReturnError`；黑苹果/无 SEP 常见，**非 panic** |
+| `kern.prng.user_reseed_count: … No such file` / `tzinit: … No such file` | 同上阶段噪声；tz 数据小差异可忽略 |
+| `Couldn't build index … Not eligible for acceleration` | launchd 早期任务加速索引；可忽略 |
+
+**屏拍停在 `virtual random`、随后卡 ~30s 再进桌面（本机 2026-09）：**  
+可见日志只到 `launchd` 的 `prng_seedctl`（用户态早期，FIPS/endpointsecurity 已过）。最后一行是噪声，真正拖延多半发生在**之后且不再刷屏**——优先对照 PM991 盘侧超时 / APFS，其次再看是否仍偶发。勿为这条去改 RNG / SecureBoot / 加无用 kext。
 
 屏拍停在 ASP、无 `panic` / `Kernel trap` → 日志不完整。查 ESP `opencore-*.txt` 与 DiagnosticReports。
 
