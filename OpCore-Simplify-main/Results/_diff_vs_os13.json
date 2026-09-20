@@ -1,0 +1,154 @@
+{
+  "smbios": {
+    "simplify": "iMac18,3",
+    "os13": "iMac18,3"
+  },
+  "boot-args": {
+    "simplify": "-v debug=0x100 keepsyms=1 -radcodec",
+    "os13": "-v keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000"
+  },
+  "kexts_only_in_simplify": [],
+  "kexts_only_in_os13": [
+    "AirportBrcmFixup.kext",
+    "AirportBrcmFixup.kext/Contents/PlugIns/AirPortBrcm4360_Injector.kext",
+    "AirportBrcmFixup.kext/Contents/PlugIns/AirPortBrcmNIC_Injector.kext"
+  ],
+  "kexts_common": [
+    "AppleALC.kext",
+    "AtherosE2200Ethernet.kext",
+    "IntelMausiEthernet.kext",
+    "Lilu.kext",
+    "NVMeFix.kext",
+    "SMCProcessor.kext",
+    "SMCSuperIO.kext",
+    "USBToolBox.kext",
+    "UTBDefault.kext",
+    "VirtualSMC.kext",
+    "WhateverGreen.kext"
+  ],
+  "acpi_only_in_simplify": [
+    "SSDT-MCHC.aml"
+  ],
+  "acpi_only_in_os13": [],
+  "acpi_common": [
+    "SSDT-EC.aml",
+    "SSDT-PLUG.aml",
+    "SSDT-SBUS.aml",
+    "SSDT-USBX.aml"
+  ],
+  "DeviceProperties_simplify": {
+    "PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)": [
+      "device-id",
+      "model"
+    ],
+    "PciRoot(0x0)/Pci(0x1f,0x3)": [
+      "layout-id"
+    ]
+  },
+  "DeviceProperties_os13": {
+    "PciRoot(0x0)/Pci(0x1f,0x3)": [
+      "No-hda-gfx",
+      "alc-delay",
+      "alctcsel",
+      "layout-id"
+    ],
+    "PciRoot(0x0)/Pci(0x2,0x0)": [
+      "AAPL,ig-platform-id",
+      "device-id"
+    ]
+  },
+  "Kernel_Quirks": {},
+  "Booter_Quirks": {},
+  "UEFI_Quirks": {},
+  "Misc_Debug": {
+    "simplify": {
+      "AppleDebug": false,
+      "ApplePanic": false,
+      "DisableWatchDog": true,
+      "DisplayDelay": 0,
+      "DisplayLevel": 2147483650,
+      "LogModules": "*",
+      "SysReport": false,
+      "Target": 3
+    },
+    "os13": {
+      "AppleDebug": true,
+      "ApplePanic": true,
+      "DisableWatchDog": true,
+      "DisplayDelay": 0,
+      "DisplayLevel": 2147483650,
+      "LogModules": "*",
+      "SysReport": false,
+      "Target": 67
+    }
+  },
+  "Misc_Security_SecureBootModel": {
+    "simplify": "Default",
+    "os13": "Disabled"
+  },
+  "UEFI_Audio": {
+    "simplify": {
+      "AudioCodec": 0,
+      "AudioDevice": "PciRoot(0x0)/Pci(0x1b,0x0)",
+      "AudioOutMask": 1,
+      "AudioSupport": false,
+      "DisconnectHda": false,
+      "MaximumGain": -15,
+      "MinimumAssistGain": -30,
+      "MinimumAudibleGain": -55,
+      "PlayChime": "Auto",
+      "ResetTrafficClass": false,
+      "SetupDelay": 0
+    },
+    "os13": {
+      "AudioCodec": 0,
+      "AudioDevice": "PciRoot(0x0)/Pci(0x1f,0x3)",
+      "AudioOutMask": 1,
+      "AudioSupport": false,
+      "DisconnectHda": false,
+      "MaximumGain": -15,
+      "MinimumAssistGain": -30,
+      "MinimumAudibleGain": -55,
+      "PlayChime": "Auto",
+      "ResetTrafficClass": true,
+      "SetupDelay": 1000
+    }
+  },
+  "UEFI_Output": {
+    "simplify": {
+      "Resolution": "Max",
+      "ForceResolution": false,
+      "UIScale": 0
+    },
+    "os13": {
+      "Resolution": "Max",
+      "ForceResolution": false,
+      "UIScale": 0
+    }
+  },
+  "opcore_bug_AirportBrcm_43A0": {
+    "index": 18,
+    "in_slice_0_15": false,
+    "equals_index_15": false,
+    "in_slice_16_18": false,
+    "would_select_AirportBrcmFixup": false,
+    "ids_16_to_end": [
+      "14E4-4331",
+      "14E4-4353",
+      "14E4-43A0",
+      "14E4-43A3",
+      "14E4-43BA"
+    ]
+  },
+  "opcore_nvme_note": {
+    "report_device": "144D-A809 / MZ9LQ128HBHQ (PM991)",
+    "unsupported_list_has_A808_only": true,
+    "unsupported_list_has_A809": false
+  },
+  "opcore_sata_note": {
+    "A102_in_UnsupportedSATA": true,
+    "auto_select_skipped_because_name_contains_AHCI": true,
+    "CtlnaAHCIPort_in_simplify_kexts": false,
+    "CtlnaAHCIPort_in_os13_kexts": false
+  }
+}
