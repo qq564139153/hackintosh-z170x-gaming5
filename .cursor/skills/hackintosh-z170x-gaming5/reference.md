@@ -95,6 +95,14 @@ SSDT：EC、PLUG、SBUS、USBX。
 - Polaris 机型优先 `iMac18,3`，不要默认成 iMacPro
 - 硬刷后生成 EFI 时勿再强加 GPU `device-id` 伪装
 - **Tahoe / OS_26：** Simplify 会选 `MacPro7,1` + AMFI/Skywalk/RestrictEvents/`apfs_aligned`（保留）；必须手工补回本机 `AppleALC`/`WhateverGreen`、HDA DeviceProperties、`alcid=5…`，并把 `AudioDevice` 从错误的 `1b.0` 改成 `1f.3`。细节见 `SKILL.md`「OS_13 → OS_26」
+- **SATA `8086-A102`：** 在 `UnsupportedSATAControllerIDs` 内，但自动选 kext 会因控制器名含 `AHCI` 而跳过 `CtlnaAHCIPort`；生成包不等于「不需要」，见 `SKILL.md`「偶发重启」
+
+## 存储（SysReport）
+
+| 控制器 | ID / 路径 | 盘 | 备注 |
+|--------|-----------|-----|------|
+| Z170 SATA AHCI | `8086-A102` @ `PciRoot(0x0)/Pci(0x17,0x0)` | GLOWAY STK240GS3-S7 | 非 macOS 系统盘 |
+| Samsung NVMe | `144D-A809` @ `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)` | **`MZ9LQ128HBHQ-00000`（PM991）** | **Ventura 在此盘**；Report 名常写成 980；PM991 黑名单级不稳定，见 `SKILL.md`「偶发重启」 |
 
 ## 审核 checklist
 

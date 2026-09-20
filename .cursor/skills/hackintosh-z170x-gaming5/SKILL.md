@@ -69,6 +69,48 @@ description: >-
 - 稳定后：关掉 `AppleDebug`/`ApplePanic`，`Target` 改回 `0` 或 `3`，并去掉 `-v`
 - 本机曾因分辨率改坏启动，用 `-v` 确认卡点
 
+## 偶发重启 / `-v` 卡在 ASP（2026-09）
+
+本机 SysReport 存储：`8086-A102` SATA（GLOWAY STK240GS3-S7）+ Samsung NVMe `144D-A809` / 型号 **`MZ9LQ128HBHQ-00000`（PM991 OEM；Report 常误标成 980）**。  
+**macOS 在该 NVMe 上**（用户确认）。日志里 `Rome…D22…Cryptex` = Ventura（Darwin 22）。
+
+### 优先怀疑：PM991 系统盘
+
+- Dortania Anti-Hackintosh Buyers Guide：**PM981 / PM991** 在 macOS 上易卡顿、TRIM 异常、不稳定；NVMeFix 对 PM981 仅部分缓解，**PM991 官方「Not planned」**
+- OpCore `UnsupportedNVMeSSDIDs` 只列了 `144D-A808`（PM981 等），**不含** `A809`/PM991 → Simplify **不会**拦这盘，只会照常加 `NVMeFix`
+- 本机已有 `NVMeFix`，对 PM991 **不足以**当根治；偶发重启/启动晚期挂起与盘侧超时很吻合
+- 日志里 `disk1` TRIM ~9s、以及 SATA Port5 空口噪声：在「系统在 NVMe」前提下，**降级为次要**；Port5 仍可忽略
+
+缓解（一次改一项，仍优先换盘）：
+
+1. 已有：`NVMeFix` + Lilu
+2. DeviceProperties 在 `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)` 加 `ps-max-latency-us` = `0`（关激进电源/APST 类行为，社区对问题 Samsung NVMe 常用）
+3. 可试 `Kernel → Quirks → SetApfsTrimTimeout` = `0`
+4. **可靠方案**：把 Ventura 迁到兼容盘（如 WD SN750 / 多数 Phison；本机光威 SATA 仅作临时，不如换正规兼容 NVMe）
+
+### 日志噪声（通常不是根因）
+
+| 行 | 含义 |
+|----|------|
+| `ASP: port is not ready for callouts` | 无 T2/SEP 时常见；单独不能定论 |
+| `AMFI: …dyld_shared_cache… is adhoc signed` | SIP/`csr` 放宽后常见 |
+| `shared_region … vm_shared_region_start_address() failed` | 多见于 launchd/dyld；常为伴随症状 |
+| `AHCI … Port 5 … COMRESET` / `PxSSTS: 0x4` | 空口；AHCI 仍会成功初始化 |
+
+屏拍停在 ASP、无 `panic` / `Kernel trap` → 日志不完整。查 ESP `opencore-*.txt` 与 DiagnosticReports。
+
+### OpCore SATA 旁注（次要）
+
+`8086-A102` 在 `UnsupportedSATAControllerIDs`，但 `kext_maestro` 因名含 `[AHCI Mode]` 跳过 `CtlnaAHCIPort`。系统不在该 SATA 上时，不必先为偶发重启加该 kext。
+
+### 排障顺序
+
+1. 分清：启动中 vs 进桌面后偶发重启
+2. `Target=67` + `-v keepsyms=1` → ESP 拷 `opencore-*.txt`；进系统查 panic 报告
+3. 先做 PM991 缓解（`ps-max-latency-us=0` / `SetApfsTrimTimeout=0`），观察是否减少
+4. 仍复发 → **换系统盘**（根本解）
+5. 进桌面后重启：另查 USB map（`UTBDefault`）、睡眠、GPU（日常 **v20**，勿用 v30）
+
 ## 视频卡顿（软伪装时代遗留）
 
 - 可选 `-radcodec`（WhateverGreen）：改善伪装 ID 下 VA 路径
