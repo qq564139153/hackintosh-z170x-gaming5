@@ -117,6 +117,11 @@
 	<dict>
 		<key>Add</key>
 		<dict>
+			<key>PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)</key>
+			<dict>
+				<key>ps-max-latency-us</key>
+				<integer>0</integer>
+			</dict>
 			<key>PciRoot(0x0)/Pci(0x1f,0x3)</key>
 			<dict>
 				<key>No-hda-gfx</key>

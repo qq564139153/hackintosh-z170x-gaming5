@@ -8,7 +8,7 @@
 |----|-----|
 | 主板 | GIGABYTE Z170X-GAMING 5（Z170，BIOS F22f） |
 | CPU | i7-7700K（Kaby Lake） |
-| GPU | RX 580 2048SP **硬刷 v30** → `1002-67DF`（#212488 + SSID`2392` + 原版 PP）；PCI `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`，ACPI `\_SB.PCI0.PEG0.PEGP`；救援原版仍为 `6FDF` |
+| GPU | RX 580 2048SP **硬刷 v20** → `1002-67DF`（#212488 + SSID`2392`；v30 加原版 PP 后间歇掉驱动已回退）；PCI `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`，ACPI `\_SB.PCI0.PEG0.PEGP`；救援原版仍为 `6FDF` |
 | 显示器 | HDMI 2560×1440（走独显） |
 | 声卡 | Realtek ALC1150 `10EC-0900`，控制器 `8086-A170`，路径 `PciRoot(0x0)/Pci(0x1f,0x3)`（HDAS） |
 | 有线网 | I219-V `8086-15B8` + Killer E2400 `1969-E0A1` |
@@ -60,6 +60,7 @@ keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000
 
 - `-radcodec`：软伪装时代改善 VA；硬刷后仍可试，对 Dock 动画未必明显
 - `-v`：排障启动日志（稳定后去掉）
+- `alcverbs=1`：COEF 采样（`tools/audio/`）用；写入 kext 补丁后可去掉
 
 Polaris **不要**加 `agdpmod=pikera`（那是 Navi）。
 
@@ -102,7 +103,7 @@ SSDT：EC、PLUG、SBUS、USBX。
 - 硬刷后生成 EFI 时勿再强加 GPU `device-id` 伪装
 - **Tahoe / OS_26：** Simplify 会选 `MacPro7,1` + AMFI/Skywalk/RestrictEvents/`apfs_aligned`（保留）；必须手工补回本机 `AppleALC`/`WhateverGreen`、HDA DeviceProperties、`alcid=5…`，并把 `AudioDevice` 从错误的 `1b.0` 改成 `1f.3`。细节见 `SKILL.md`「OS_13 → OS_26」
 - **SATA `8086-A102`：** 在 `UnsupportedSATAControllerIDs` 内，但自动选 kext 会因控制器名含 `AHCI` 而跳过 `CtlnaAHCIPort`；生成包不等于「不需要」，见 `SKILL.md`「偶发重启」
-- **WiFi `14E4-43A0`（BCM4360）BUG（2026-09 实测）：** `kext_maestro` 用 `BroadcomWiFiIDs[:15]` / `[15]` / `[16:18]` 切片，**漏掉**索引 18+ 的 `43A0`/`43A3`/`43BA` → 默认 **不选** `AirportBrcmFixup`。本机 OS_13 已手工包含，勿删
+- **WiFi `14E4-43A0`（BCM4360）BUG（2026-09 实测）：** `kext_maestro` 用 `BroadcomWiFiIDs[:15]` / `[15]` / `[16:18]` 切片，**漏掉**索引 18+ 的 `43A0`/`43A3`/`43BA` → 默认 **不选** `AirportBrcmFixup`。本机卡子系统 `0111106B` = Apple 原装，Ventura 原生免驱，OS_13 里的 AirportBrcmFixup 可留可删（非 Apple 卡才必需）
 - **NVMe PM991：** Report 标成 980/`144D-A809`；黑名单只有 `A808`，Simplify 只加 `NVMeFix` 不警告 → 与偶发重启相关，见「偶发重启」
 - **对比脚本：** `OpCore-Simplify-main/tools_compare_default_build.py`（非交互生成 Ventura 默认）+ `tools_compare_to_os13.py`（对 OS_13）
 

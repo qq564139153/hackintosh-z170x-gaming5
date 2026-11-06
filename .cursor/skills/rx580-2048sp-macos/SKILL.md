@@ -128,6 +128,21 @@ v30 = v20 + 拷贝 v00 的 SCLK P0–P7 与 PowerTune（TDP 145 等）；刷写 
 - 无显示：清 CMOS → 主板 HDMI → 开 iGPU → 再还原
 - 还原后 GPU-Z 应为 `6FDF`
 
+## 窗口阴影残影 / 斜线 / 深色块（v20 已正常识别时）
+
+现象：系统报告 RX 570、`0x67df`、8GB、Metal 2 都正常，但窗口角拖出斜线、菜单栏下方残留深色矩形（WindowServer 阴影没擦掉）。
+
+- **不是**刷卡 / EFI 问题：2048SP = 2048 SP，与 RX 570 同规格，驱动匹配；EFI 无 GPU 伪装即正确
+- 联网共识：显示时序 / 色深导致的合成残影（Reddit r/hackintosh RX580 改刷新率即好；10bit 帧缓冲阴影块状 Win/macOS 都有报告）
+- 本机曾见：`2560x1440 @ 120Hz`、帧缓冲 **30 位 `ARGB2101010`**、HDMI
+
+一次改一项排查：
+1. 系统设置 → 显示器 → 刷新率改 **60Hz**（或显示器支持的 100/144Hz）测试；残影消失即确认时序问题
+2. 仍有：改 8bit（BetterDisplay 关 10bit / 选「数百万种颜色」）→ 系统报告应为 `24 位 ARGB8888`
+3. 显示器关 FreeSync/Adaptive-Sync/超频刷新；HDMI 换 DP 或换线
+4. 临时：辅助功能 → 显示 → 降低透明度，可减轻
+- 勿为此去加 framebuffer / `agdpmod` / 再刷 ROM
+
 ## 验证
 
 - Windows GPU-Z：Device `67DF`；VRAM 8GB；v30 时 Default Clock 1310

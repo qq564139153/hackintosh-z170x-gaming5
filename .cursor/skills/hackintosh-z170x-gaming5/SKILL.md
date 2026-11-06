@@ -45,12 +45,22 @@ description: >-
 4. 音频 layout / 间歇无声加载 `applealc-layout-tuning`
 5. 双系统时间偏移加载 `dualboot-rtc-utc`（不改 EFI）
 
+### Reset NVRAM 怎么做（本机）
+
+- 已加载 `ResetNvramEntry.efi` 且 `HideAuxiliary=false` → OpenCore 菜单最右侧直接有 **Reset NVRAM** 图标；看不到就按空格显示辅助项
+- 选中回车 → 黑屏自动重启 → 回菜单选 macOS 卷；只做一次
+- `PollAppleHotKeys=false` → 白苹果 `Cmd+Opt+P+R` 无效
+- 重置会清 BIOS 启动顺序：若直接进 Windows，去 BIOS 把 PM991（OC 所在盘）设回第一启动
+- 本机实测（2026-11）：Reset 后直接不进 OC 菜单 → 开机狂按 **F12** 选 `UEFI OS / SAMSUNG MZ9LQ128` 项（靠 `EFI\BOOT\BOOTx64.efi` 兜底）；再 **Del** 进 BIOS 设 Boot Option #1；CSM 须 Disabled
+- 根治可选：`Misc→Boot→LauncherOption` 由 `Disabled` 改 `Full`（OC 每次自注册为首启项，防 Reset/Windows 更新抢启动）
+
 ## 本机已知正确基线（2026-09）
 
 - SMBIOS：`iMac18,3`
-- GPU：已硬刷 v30（TPU #212488 + SSID`2392` + 原版 PowerPlay）→ Device **`0x67DF`**。**无** GPU DeviceProperties 软伪装（刷成功后已去掉）
-- Audio：`alcid=5` + `layout-id=5` + `alctcsel=1` + `alcdelay=1000` @ `PciRoot(0x0)/Pci(0x1f,0x3)`
-  - Windows 热重启无声：`AudioSupport`+`DisconnectHda` 本机实测无效已还原；优先 Windows 关快速启动 / `powercfg -h off`
+- GPU：日常 **v20**（TPU #212488 + SSID`2392`，≈1244 MHz）→ Device **`0x67DF`**；v30（+原版 PowerPlay）间歇掉驱动已回退，见 `rx580-2048sp-macos`。**无** GPU DeviceProperties 软伪装（刷成功后已去掉）
+- Audio：`alcid=5` + `layout-id=5` + `alctcsel=1` + `alcdelay=1000` @ `PciRoot(0x0)/Pci(0x1f,0x3)`；2026-11 COEF verbs 写入 AppleALC layout 5 后声卡已验证正常，调试用 `alcverbs=1` 已去掉
+  - Windows 热重启无声：`AudioSupport`+`DisconnectHda` 本机实测无效已还原；优先 Windows 关快速启动 / `powercfg -h off`；根治走 `applealc-layout-tuning` 的 COEF 流程（`tools/audio/`）
+- NVMe（PM991）：`ps-max-latency-us=0`；`SetApfsTrimTimeout` 保持 **`-1`**（`0` 疑致卡在 AHCI 之后，见下）
 - Output：`Resolution=Max`，`ForceResolution=false`，`UIScale=0`
 - `Misc → Boot → Timeout`：`10`
 - SSDT：EC / PLUG / SBUS / USBX
@@ -115,7 +125,7 @@ description: >-
 
 1. 已有：`NVMeFix` + Lilu
 2. **已加（2026-09）：** `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)` → `ps-max-latency-us=0`（PM991 临时降 APST；需覆盖 ESP + Reset NVRAM）
-3. 仍偶发再试：`Kernel → Quirks → SetApfsTrimTimeout` = `0`
+3. ~~`SetApfsTrimTimeout=0`~~ **已回退为 `-1`（2026-11）：** 改 `0` 后 OS_13 `-v` 停在 `[AHCI][HBA] start::512: Successfully initialized AHCI controller` 不再前进（下一步就是挂 APFS 根盘）；该值从未在真机验证过。改回 `-1` 前勿再碰；如仍想关 TRIM，单独一项改、单独验证
 4. **可靠方案仍是换盘**（WD SN750 / 多数 Phison 等）
 
 ### 日志噪声（通常不是根因）
@@ -133,6 +143,8 @@ description: >-
 **屏拍停在 `virtual random`、随后卡 ~30s 再进桌面（本机 2026-09）：**  
 可见日志只到 `launchd` 的 `prng_seedctl`（用户态早期，FIPS/endpointsecurity 已过）。最后一行是噪声，真正拖延多半发生在**之后且不再刷屏**——优先对照 PM991 盘侧超时 / APFS，其次再看是否仍偶发。勿为这条去改 RNG / SecureBoot / 加无用 kext。
 
+**屏拍最后一行是 `[AHCI][HBA] … Successfully initialized AHCI controller` 且不动：** Port2–5 的 COMRESET 是空口噪声；真正卡在随后的 APFS 挂根盘。先对比最近改过的存储相关项（`SetApfsTrimTimeout`、NVMe DeviceProperties、NVMeFix），回退到最后可启动值；等 ~2 分钟若出现 `Still waiting for root device` = 根盘没挂上（NVMe 未识别）。OC 二进制升级只影响到内核交接前，能跑到 AHCI 说明 OC 本身没问题。
+
 屏拍停在 ASP、无 `panic` / `Kernel trap` → 日志不完整。查 ESP `opencore-*.txt` 与 DiagnosticReports。
 
 ### OpCore SATA 旁注（次要）
@@ -142,8 +154,9 @@ description: >-
 ### 排障顺序
 
 1. 分清：启动中 vs 进桌面后偶发重启
+   - 「开机卡死 → 按 Reset → 能进但无声」：卡死是主问题，无声是热复位副作用（见 `applealc-layout-tuning`）；先治卡死
 2. `Target=67` + `-v keepsyms=1` → ESP 拷 `opencore-*.txt`；进系统查 panic 报告
-3. 先做 PM991 缓解（`ps-max-latency-us=0` / `SetApfsTrimTimeout=0`），观察是否减少
+3. 先做 PM991 缓解（`ps-max-latency-us=0`；勿用 `SetApfsTrimTimeout=0`，见上），观察是否减少
 4. 仍复发 → **换系统盘**（根本解）
 5. 进桌面后重启：另查 USB map（`UTBDefault`）、睡眠、GPU（日常 **v20**，勿用 v30）
 
@@ -156,8 +169,22 @@ description: >-
 ## 本机已知未完成 / 易误判
 
 - Windows→macOS 热重启无声：`AudioSupport`+`DisconnectHda` 本机无效；见 `applealc-layout-tuning`（先 Windows 快速启动，勿再推该 EFI 组合）
-- WiFi BCM4360（`14E4-43A0`）在 Ventura 上可能需 AirportBrcmFixup（+ OCLP）
-- `UTBDefault.kext` = 无真实 USB map
+- WiFi BCM4360（`14E4-43A0`）子系统 `0111106B` = **Apple 原装卡**，Ventura 原生免驱；AirportBrcmFixup 可留可删（Sonoma+ 才需 OCLP）
+- `UTBDefault.kext` = 无真实 USB map，且**不解除 15 端口上限**：Z170 XHC（`8086-A12F`）HS 口排在前面 → 板载 USB3 口大概率只跑 USB2 速度。修法：Windows 用 USBToolBox 建 `UTBMap.kext`，删 `UTBDefault`
+- DSDT 原生 `H_EC` 的 `_STA` 恒返回 0 → 用假 `SSDT-EC` 正确，勿去禁用/改名 H_EC
+- DMAR 有 Reserved Memory Region（BIOS 开 VT-d），但 `DisableIoMapper=true` 已关 AppleVTD → `DisableIoMapperMapping` 不需要
+- CFG Lock：网上 Z170X-Gaming 5 F20–F22 偏移 `setup_var 0x4EF 0x00`；本机 F22f 先用 `ControlMsrE2.efi` 验证再改，成功后可关 `AppleXcpmCfgLock`
+
+## 校验 config（ocvalidate 版本必须与 OpenCore 一致）
+
+1. 下载对应版 `OpenCore-<ver>-RELEASE.zip` 到 `%TEMP%`，用 `Utilities/ocvalidate/ocvalidate.exe <config.plist>`
+2. 新版只报 `Missing key …` = schema 旧（如 1.0.8 新增 `Drivers[].HideVerbose`），不是逻辑错误
+3. 识别 EFI 版本：对比 `X64/EFI/OC/OpenCore.efi` 哈希；都不匹配 = Simplify 拉的夜间构建
+4. 2026-11：OS_13 原为夜间构建（1.0.7 schema）→ 已换 **1.0.8 正式版**（`BOOTx64`/`OpenCore`/`OpenRuntime`/`OpenCanopy`/`ResetNvramEntry`，`HfsPlus` 非 OCPkg 不换）+ 驱动补 `HideVerbose=false`，ocvalidate 1.0.8 **0 问题**；**2026-11-06 已真机进桌面**（同时 COEF 声卡正常、出现窗口阴影残影）
+   - 随后去 `alcverbs=1` + Reset NVRAM 后：`-v` 过 cryptex/dyld/`spaceman_scan_free_blocks` TRIM 后停住（无 panic）
+   - **2026-11-07 已回退：** 部署回退件（5 个 OC 二进制取旧夜间构建 + 去 `HideVerbose`，其余含声卡修复一致）后真机可进系统 → `OS_13` 已恢复为该版本并删除 `OS_13_oc-rollback`。**当前 OS_13 = 夜间构建（1.0.7 schema）+ AppleALC COEF 修复**；再升 1.0.8 须单独一项改、单独验证
+5. 升级 OC 只换上述二进制 + 补新键；Resources 图标来自 OcBinaryData，可不动
+6. OS_26 仍是夜间构建（1.0.7 校验 0 问题，1.0.8 报 5 个 `HideVerbose`：含 `apfs_aligned.efi`）；升级同上，`apfs_aligned`/`HfsPlus` 不换
 - 公开 git：勿提交超大 `.exe` / Results 缓存；注意 SMBIOS 序列号隐私
 
 ## OS_13 → OS_26（OpCore Simplify）对照
@@ -191,6 +218,15 @@ description: >-
 6. **Timeout：** 可改 `10`（本机习惯）
 7. **勿加** GPU DeviceProperties（本机已硬刷 `67DF`）
 8. **勿删** OS26 的 AMFI / Skywalk / RestrictEvents / `apfs_aligned`
+9. **PM991 缓解：** NVMe `1d.0/0.0` 的 `ps-max-latency-us=0`；`SetApfsTrimTimeout` 保持 `-1`（`0` 在 OS_13 疑致启动卡住）
+10. 有 `AMFIPass` 时 `amfi=0x80` 多余（会影响权限弹窗/部分 App）；能启动后去掉
+
+### 2026-11 联网版本基线（审核时对照）
+
+- OpenCore **1.0.8** 正式版（1.0.9 开发中）；AppleALC **1.9.8**；Lilu 1.7.2 / WEG 1.7.1 / VirtualSMC 1.3.8 / NVMeFix 1.1.3+ / AirportBrcmFixup 2.2.0 / AMFIPass 1.4.1 均为最新
+- OCLP：稳定版 **2.5.1 只到 Sequoia**；Tahoe 仅 **3.0.0-rc**（官方警告不稳定）
+- Ventura 已停更；iMac18,3 最后支持 Ventura。想升级又求稳：Sequoia + `MacPro7,1`（同 OS_26 套件）+ OCLP 2.5.1 修 BCM4360
+- 更新 OC 后用同版本 `ocvalidate` 校验 config schema
 
 ### 安装顺序建议
 
@@ -199,9 +235,26 @@ description: >-
 3. 装完进桌面后再考虑 OCLP root patch（Wi‑Fi / AppleHDA 等）
 4. 失败则仍用 OS13 EFI 回 Ventura
 
+## AI 工具链评估（2026-10）
+
+- **没有**成熟的黑苹果专用 MCP；本仓库已有 Cursor 文件/终端能力 = Filesystem MCP 的作用，不必再装
+- 有用：`lzhoang2801/OpCore-Simplify`（~7.6k★，已在用）、OCAT（GUI 校验/同步 kext）、Dortania 指南、`5T33Z0/OC-Little-Translated` 的 `Config_Tweaks_AI.md`（DEBUG 日志 → LLM 分析 → 一次改一项）
+- 不适合本机：Peekaboo / mcp-x-mac-seed 要求 macOS 15+（本机 Ventura 13）；cua / otto 偏桌面自动化，对 EFI/内核排障无增益
+- 真正起作用的是本仓库技能 + `tools/` 脚本（vbios、audio COEF），而非多装 MCP
+
+## 部署到 ESP（Windows 一键）
+
+- `tools\deploy-efi.cmd`（双击，自动 UAC）或 `tools\deploy-efi.ps1 [-Build OS_26] [-WhatIf] [-CollectLogs] [-Yes]`
+- 不带 `-Build` 时自动扫描 `OpenCore EFI\**\EFI\OC\config.plist` 列出源（修改时间 / kext 数 / 大小）供选号；新加的 EFI 目录无需改脚本
+- 确认前打印全部硬盘（型号/序列号/容量/总线/健康/启动盘标记）及各分区（类型/大小/盘符/剩余），目标盘与分区绿色标出
+- 目标 = macOS 所在 PM991（型号含 `MZ9LQ128`，Windows 下为磁盘 1，ESP 300MB 无盘符）；Windows 盘 GLOWAY 的 ESP 是 Windows 引导，**勿写**
+- 保险：型号唯一匹配 + 拒绝 `IsBoot/IsSystem` 盘 + 必须有 APFS 分区 + 写前输入 Y
+- 流程：临时盘符 → 备份旧 EFI 到 `_esp_backup\<时间戳>`（gitignore）→ `robocopy /MIR` 只镜像 `EFI\`（根目录 opencore 日志不动）→ 校验 config.plist 哈希 → 移除盘符
+- 脚本含中文须存 **UTF-8 BOM**（PS 5.1）；`.cmd` 存 GBK；参数勿叫 `$Profile`（撞自动变量）
+
 ## 标准部署检查清单
 
-- [ ] 只同步已验证的 EFI 树
+- [ ] 只同步已验证的 EFI 树（用 `tools\deploy-efi.cmd`）
 - [ ] Reset NVRAM
 - [ ] 关于本机 / 系统报告：VRAM≈8GB、GPU=`67DF`、Metal
 - [ ] 声音：后置绿孔 + 「内建」输出（非 HDMI）

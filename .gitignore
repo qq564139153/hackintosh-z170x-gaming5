@@ -2,6 +2,7 @@
 
 # Local reference clones / temp helpers
 _ref/
+_esp_backup/
 __pycache__/
 
 # OS junk

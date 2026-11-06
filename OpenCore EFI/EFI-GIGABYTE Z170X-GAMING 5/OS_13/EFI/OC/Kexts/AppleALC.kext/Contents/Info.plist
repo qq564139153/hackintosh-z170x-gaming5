@@ -12420,7 +12420,7 @@
 					AUccEAFHHUABRx4RAUcfAQGHHFABhx2QAYce
 					oAGHH5ABlxxgAZcdkAGXHoEBlx8CAacccAGn
 					HTABpx6BAacfAQG3HIABtx1AAbceIQG3HwEB
-					5xyQAecd4AHnHkUB5x8BAUcMAg==
+					5xyQAecd4AHnHkUB5x8BAUcMAgIFAAcCBHyw
 					</data>
 					<key>FuncGroup</key>
 					<integer>1</integer>
@@ -12428,7 +12428,7 @@
 					<integer>5</integer>
 					<key>WakeConfigData</key>
 					<data>
-					AUcMAg==
+					AUcMAgIFAAcCBHyw
 					</data>
 					<key>WakeVerbReinit</key>
 					<true/>
