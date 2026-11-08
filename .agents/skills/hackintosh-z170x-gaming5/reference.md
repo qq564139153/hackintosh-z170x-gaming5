@@ -1,0 +1,144 @@
+# reference — 本机硬件与配置快照
+
+权威来源：`OpCore-Simplify-main/SysReport/Report.json` + 当前 `config.plist`。
+
+## 硬件表
+
+| 项 | 值 |
+|----|-----|
+| 主板 | GIGABYTE Z170X-GAMING 5（Z170，BIOS F22f） |
+| CPU | i7-7700K（Kaby Lake） |
+| GPU | RX 580 2048SP **硬刷 v20** → `1002-67DF`（#212488 + SSID`2392`；v30 加原版 PP 后间歇掉驱动已回退）；PCI `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)`，ACPI `\_SB.PCI0.PEG0.PEGP`；救援原版仍为 `6FDF` |
+| 显示器 | HDMI 2560×1440（走独显） |
+| 声卡 | Realtek ALC1150 `10EC-0900`，控制器 `8086-A170`，路径 `PciRoot(0x0)/Pci(0x1f,0x3)`（HDAS） |
+| 有线网 | I219-V `8086-15B8` + Killer E2400 `1969-E0A1` |
+| WiFi | Broadcom BCM4360 `14E4-43A0` @ `PciRoot(0x0)/Pci(0x1c,0x6)/Pci(0x0,0x0)` |
+| 报告无核显条目 | 多半 BIOS 已关 iGPU（黑屏救援时需开 iGPU + 主板 HDMI） |
+
+## DeviceProperties 期望值
+
+### GPU — 硬刷后
+
+**当前基线：不要写 GPU DeviceProperties。** 卡上已是 `67DF`，软伪装已移除。
+
+仅当回退到原版 `6FDF`、临时软伪装时才加：
+
+| Key | 值 |
+|-----|-----|
+| 路径 | `PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)` |
+| `device-id` | data 小端 `67FF`（plist base64 `/2cAAA==`） |
+| `model` | `AMD Radeon RX 570`（可选） |
+
+不要仅为「显示成 RX 580」改回 `67DF` 伪装；2048SP 更接近 570。硬刷成功后身份由 VBIOS 提供。
+
+### HDA — `PciRoot(0x0)/Pci(0x1f,0x3)`
+
+| Key | 值 |
+|-----|-----|
+| `layout-id` | `5`（与 `alcid=5` 一致） |
+| `alc-delay` | `1000` |
+| `alctcsel` | data `01 00 00 00` |
+| `No-hda-gfx` | 阻止绑到 HDMI 音频 |
+
+### iGPU（冗余但无害）— `PciRoot(0x0)/Pci(0x2,0x0)`
+
+- headless `ig-platform-id` `59120003`（`AwASWQ==`）
+
+### NVMe（PM991 临时缓解）— `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)`
+
+| Key | 值 |
+|-----|-----|
+| `ps-max-latency-us` | `0`（integer；暂不换盘时降 APST） |
+
+## boot-args 期望值
+
+```
+keepsyms=1 npci=0x3000 alcid=5 alctcsel=1 alcdelay=1000
+```
+
+可选：
+
+- `-radcodec`：软伪装时代改善 VA；硬刷后仍可试，对 Dock 动画未必明显
+- `-v`：排障启动日志（稳定后去掉）
+- `alcverbs=1`：COEF 采样（`tools/audio/`）用；写入 kext 补丁后可去掉
+
+Polaris **不要**加 `agdpmod=pikera`（那是 Navi）。
+
+## Output / Picker（GOP 安全基线）
+
+| Key | 本机安全值 | 危险值（已踩坑） |
+|-----|------------|------------------|
+| `Resolution` | `Max` | 固定 `2560x1440` |
+| `ForceResolution` | `false` | `true` |
+| `UIScale` | `0` | `1` + NVRAM 写入 `UIScale` |
+
+危险组合在本机 HDMI + Polaris GOP 上会导致黑屏 / 反复进不了系统；已回退并保留 `-radcodec` 不影响启动的结论。
+
+Picker 文案 = 卷标；`Timeout=10`。
+
+## PlatformInfo
+
+- `SystemProductName`：`iMac18,3`（Polaris AGPM；避免 iMacPro Vega 功耗表导致 UI stutter）
+
+## Kext / SSDT / 驱动基线
+
+常见启用：Lilu、AppleALC、WhateverGreen、VirtualSMC(+SMC*)、IntelMausi、AtherosE2200、NVMeFix、USBToolBox + UTBDefault。
+
+SSDT：EC、PLUG、SBUS、USBX。
+
+## UEFI.Audio 注意
+
+| Key | 当前/期望 |
+|-----|-----------|
+| `AudioDevice` | 必须是 HDA 控制器：`PciRoot(0x0)/Pci(0x1f,0x3)`（不是 Root Port `1b.0`） |
+| `AudioSupport` | 本机 OS_13 基线 **false**；开 true 才能让 ResetTrafficClass / DisconnectHda / SetupDelay 生效 |
+| `DisconnectHda` / `ResetTrafficClass` / `SetupDelay` | 本机热重启无声试过（含 DisconnectHda + SetupDelay=1500）**无效已还原** |
+
+无 `UEFI → Quirks → ResetHDA`；勿按过时 GPT 建议硬加该键。热重启优先 Windows 关快速启动。
+
+## OpCore-Simplify 注意
+
+- Spoof 表可含 `"1002-6FDF": "1002-67FF"`（仅软伪装阶段）
+- Polaris 机型优先 `iMac18,3`，不要默认成 iMacPro
+- 硬刷后生成 EFI 时勿再强加 GPU `device-id` 伪装
+- **Tahoe / OS_26：** Simplify 会选 `MacPro7,1` + AMFI/Skywalk/RestrictEvents/`apfs_aligned`（保留）；必须手工补回本机 `AppleALC`/`WhateverGreen`、HDA DeviceProperties、`alcid=5…`，并把 `AudioDevice` 从错误的 `1b.0` 改成 `1f.3`。细节见 `SKILL.md`「OS_13 → OS_26」
+- **SATA `8086-A102`：** 在 `UnsupportedSATAControllerIDs` 内，但自动选 kext 会因控制器名含 `AHCI` 而跳过 `CtlnaAHCIPort`；生成包不等于「不需要」，见 `SKILL.md`「偶发重启」
+- **WiFi `14E4-43A0`（BCM4360）BUG（2026-09 实测）：** `kext_maestro` 用 `BroadcomWiFiIDs[:15]` / `[15]` / `[16:18]` 切片，**漏掉**索引 18+ 的 `43A0`/`43A3`/`43BA` → 默认 **不选** `AirportBrcmFixup`。本机卡子系统 `0111106B` = Apple 原装，Ventura 原生免驱，OS_13 里的 AirportBrcmFixup 可留可删（非 Apple 卡才必需）
+- **NVMe PM991：** Report 标成 980/`144D-A809`；黑名单只有 `A808`，Simplify 只加 `NVMeFix` 不警告 → 与偶发重启相关，见「偶发重启」
+- **对比脚本：** `OpCore-Simplify-main/tools_compare_default_build.py`（非交互生成 Ventura 默认）+ `tools_compare_to_os13.py`（对 OS_13）
+
+## 存储（SysReport）
+
+| 控制器 | ID / 路径 | 盘 | 备注 |
+|--------|-----------|-----|------|
+| Z170 SATA AHCI | `8086-A102` @ `PciRoot(0x0)/Pci(0x17,0x0)` | GLOWAY STK240GS3-S7 | 非 macOS 系统盘 |
+| Samsung NVMe | `144D-A809` @ `PciRoot(0x0)/Pci(0x1d,0x0)/Pci(0x0,0x0)` | **`MZ9LQ128HBHQ-00000`（PM991）** | **Ventura 在此盘**；Report 名常写成 980；PM991 黑名单级不稳定，见 `SKILL.md`「偶发重启」 |
+
+## 审核 checklist
+
+- [ ] GPU：硬刷态无 DeviceProperties 伪装；或软伪装路径与 Report.json 一致
+- [ ] HDA DeviceProperties 路径与 Report.json 一致
+- [ ] `alcid` 与 `layout-id` 同步
+- [ ] SMBIOS 与 GPU 架构匹配（Polaris → iMac18,x）
+- [ ] 无 Navi-only boot-args
+- [ ] Output 未开危险 ForceResolution 组合
+- [ ] Timeout / ShowPicker 符合预期
+- [ ] WiFi：BCM4360 是否已加 AirportBrcm（若需要）
+- [ ] USB：是否仍为空白 UTBDefault
+- [ ] 改完后计划 Reset NVRAM
+
+## Git 卫生
+
+- 忽略 / 勿提交：OpCore 安装器 `.exe`、巨大 Results 缓存、大体积 ROM dump（按需）
+- 推送被拒时检查**历史 blob**，不只看当前工作树
+- 公开仓库注意 SMBIOS 序列号 / MLB / ROM 隐私
+
+## 会话经验归属（避免重复开技能）
+
+| 主题 | 归入 |
+|------|------|
+| 修驱动 / 流畅 / 伪装 / VBIOS / 黑屏救援 / 1244→1310 | `rx580-2048sp-macos` |
+| 后置无声 / layout 试错 / 间歇音频 | `applealc-layout-tuning` |
+| 双系统时间偏几小时 | `dualboot-rtc-utc` |
+| Picker 文案、Timeout、GOP 黑屏、EFI 审核、部署 | 本技能 + 本 reference |
+| YouTube/VP9 软解、`-radcodec` | 本技能（视频卡顿）+ `rx580` WhateverGreen |
